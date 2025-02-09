@@ -1,11 +1,20 @@
 import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
-import Nav from './components/Navigation/Navigation';
-import Login from './components/User/LoginForm';
-import SingleBook from './components/SingleBook/SingleBook';
-import Books from './components/Books/Books';
-import Signup from './components/User/RegisterForm';
-import UserProfile from './components/User/UserProfile';
-import Reservations from './components/Reservations/Reservations';
+import 'bootstrap/dist/css/bootstrap.min.css';
+import './App.css'
+import Navigation from './components/Navigation/Navigation';
+// import Admin from './components/Admin/Admin';
+// import BusinessOwner from './components/BusinessOwner/BusinessOwner';
+// import ChangePassword from './components/ChangePassword/ChangePassword';
+// import FindEmail from './components/FindEmail/FindEmail';
+import SignIn from './components/SignIn/SignIn';
+import Home from './components/Home/Home';
+// import Order from './components/Order/Order';
+// import ProductDetail from './components/ProductDetail/ProductDetail';
+import Registration from './components/Registration/Registration';
+// import UserCart from './components/UserCart/UserCart';
+// import UserDetail from './components/UserDetail/UserDetail';
+// import UserOrderDetail from './components/UserOrderDetail/UserOrderDetail';
+// import UserOrderHistory from './components/UserOrderHistory/UserOrderHistory';
  import { useState, useEffect } from 'react';
 
 import {store} from "./redux/store";
@@ -13,7 +22,6 @@ import { Provider } from "react-redux";
 
 function App() {
   const [token, setToken] = useState(localStorage.getItem('token') || null);
-  const [changeFlag, setChangeFlag] = useState("");
 
   useEffect(()=>{
     if(token){
@@ -28,14 +36,22 @@ function App() {
     <>
       <Provider store={store}>
         <Router>
-          <Nav path="/Nav" token={token} setToken={setToken}/>
+          <Navigation path="/Navigation" token={token} setToken={setToken}/>
           <Routes>
-            <Route path="/" element={<Books token={token} setToken={setToken} changeFlag={changeFlag}/>} />
-            <Route path="/SingleBook/:id" element={<SingleBook token={token} setToken={setToken}/>} />
-            <Route path="/Login" element={<Login token={token} setToken={setToken}/>} />
-            <Route path="/Signup" element={<Signup token={token} setToken={setToken}/>} />
-            <Route path="/UserProfile" element={<UserProfile token={token} setToken={setToken}/>} />
-            <Route path="/Reservations" element={<Reservations token={token} setToken={setToken} setChangeFlag={setChangeFlag}/>} />
+            <Route path="/" element={<Home token={token} setToken={setToken}/>} />
+            <Route path="/Registration" element={<Registration token={token} setToken={setToken}/>} />
+            <Route path="/SignIn" element={<SignIn token={token} setToken={setToken}/>} />
+            {/* <Route path="/UserDetail" element={<UserDetail token={token} setToken={setToken}/>} /> */}
+            {/* <Route path="/FindEmail" element={<FindEmail token={token} setToken={setToken}/>} /> */}
+            {/* <Route path="/ChangePassword" element={<ChangePassword token={token} setToken={setToken} />} /> */}
+            {/* <Route path="/Order" element={<Order token={token} setToken={setToken} />} /> */}
+            {/* <Route path="/UserCart" element={<UserCart token={token} setToken={setToken} />} /> */}
+            {/* <Route path="/UserOrderDetail" element={<UserOrderDetail token={token} setToken={setToken} />} /> */}
+            {/* <Route path="/UserOrderHistory" element={<UserOrderHistory token={token} setToken={setToken} />} /> */}
+            {/* <Route path="/BusinessOwner" element={<BusinessOwner token={token} setToken={setToken} />} /> */}
+            {/* <Route path="/Admin" element={<Admin token={token} setToken={setToken} />} /> */}
+            {/* <Route path="/BusinessOwner" element={<BusinessOwner token={token} setToken={setToken} />} /> */}
+            {/* <Route path="/ProductDetail" element={<ProductDetail token={token} setToken={setToken} />} /> */}
           </Routes>
         </Router>
       </Provider>
