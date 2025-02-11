@@ -1,0 +1,109 @@
+Table user {
+  id String(uuid) pk
+  email string 
+  firstNname string 
+  lastNname string 
+  password String 
+  address String 
+  phone String 
+  userRoleId int
+  confirmAdmin boolean
+  taxId  string
+  isDeleted boolean 
+}
+
+Table userRole {
+  id int pk
+  name string
+  description string
+  isDeleted boolean
+}
+
+Table review {
+  id int pk
+  createdAt timestamp 
+  rating int 
+  review string
+  orderDetailId int 
+  userId string
+  productId string(uuid) 
+  image string
+  isDeleted boolean 
+}
+
+Table order{
+  id int pk
+  userId string(uuid)
+  createdAt timestamp
+  name string
+  address string
+  phone string 
+  paymentMethod string 
+  isDeleted boolean 
+  
+}
+
+Table orderDetail {
+  id int pk
+  orderId string 
+  productId string(uuid)
+  quantity int 
+  isDeleted boolean 
+}
+
+Table cart {
+  id int pk
+  userId string(uuid)
+  quantity string 
+  isDeleted boolean 
+}
+
+Table cartDetail {
+  id int pk
+  cartId string 
+  productId string(uuid)
+  quantity string 
+  isDeleted boolean 
+}
+ 
+Table product {
+  id string(uuid) pk
+  userId string(uuid)
+  name string 
+  categoryDetailId id
+  description string
+  price int 
+  images string
+  quantity int 
+  isDeleted boolean 
+}
+
+Table category {
+  id int pk
+  name string
+  description string
+  isDeleted boolean 
+}
+
+Table categoryDetail {
+  id int pk
+  categoryId int pk
+  name string
+  description string
+  isDeteted boolean
+}
+
+
+Ref: user.id < order.userId
+Ref: order.id < orderDetail.orderId
+Ref: user.id < product.userId
+Ref: user.id < cart.userId
+Ref: cart.id < cartDetail.cartId
+Ref: product.id < cartDetail.productId
+Ref: product.id < orderDetail.productId
+Ref: user.id < review.userId
+Ref: product.id < review.productId
+Ref: orderDetail.id - review.orderDetailId
+Ref: product.categoryDetailId > categoryDetail.id
+Ref: user.userRoleId > userRole.id
+Ref: category.id < categoryDetail.categoryId

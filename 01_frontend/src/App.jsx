@@ -21,7 +21,10 @@ import {store} from "./redux/store";
 import { Provider } from "react-redux";
 
 function App() {
-  const [token, setToken] = useState(localStorage.getItem('token') || null);
+  const [token, setToken] = useState(localStorage.getItem('token') ?? null);
+
+  //?? null: Only falls back to null if the value is null or undefined.
+  //|| null: Falls back to null for any falsy value, including "" (empty string), false, 0, NaN, etc.
 
   useEffect(()=>{
     if(token){

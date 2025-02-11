@@ -3,7 +3,7 @@ import { fetchBaseQuery, createApi } from "@reduxjs/toolkit/query/react";
 export const api = createApi({
   reducerPath: "api",
   baseQuery: fetchBaseQuery({
-    baseUrl: "https://fsa-book-buddy-b6e748d1380d.herokuapp.com/api",
+    baseUrl: "https://localhost:3000/",
     prepareHeaders: (headers) => {
       const token = localStorage.getItem("token");
       if (token) {
@@ -13,6 +13,6 @@ export const api = createApi({
       return headers;
     },
   }),
-  tagTypes: ["Books"],
+  tagTypes: ["user"],
   endpoints: () => ({}),
 });
