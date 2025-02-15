@@ -12,7 +12,7 @@ import Home from './components/Home/Home';
 // import ProductDetail from './components/ProductDetail/ProductDetail';
 import Registration from './components/Registration/Registration';
 // import UserCart from './components/UserCart/UserCart';
-// import UserDetail from './components/UserDetail/UserDetail';
+import UserDetail from './components/UserDetail/UserDetail';
 // import UserOrderDetail from './components/UserOrderDetail/UserOrderDetail';
 // import UserOrderHistory from './components/UserOrderHistory/UserOrderHistory';
  import { useState, useEffect } from 'react';
@@ -22,6 +22,7 @@ import { Provider } from "react-redux";
 
 function App() {
   const [token, setToken] = useState(localStorage.getItem('token') ?? null);
+  const [userRole, setUserRole] = useState(localStorage.getItem('userRole') ?? null);
 
   //?? null: Only falls back to null if the value is null or undefined.
   //|| null: Falls back to null for any falsy value, including "" (empty string), false, 0, NaN, etc.
@@ -29,22 +30,24 @@ function App() {
   useEffect(()=>{
     if(token){
       localStorage.setItem('token', token);
+      localStorage.setItem('userRole', userRole);
     } 
     else{
       localStorage.removeItem('token');
+      localStorage.removeItem('userRole');
     }
-  },[token]);
+  },[token , userRole]);
 
   return (
     <>
       <Provider store={store}>
         <Router>
-          <Navigation path="/Navigation" token={token} setToken={setToken}/>
+          <Navigation path="/Navigation" token={token} setToken={setToken} userRole={userRole} setUserRole={setUserRole}/>
           <Routes>
-            <Route path="/" element={<Home token={token} setToken={setToken}/>} />
-            <Route path="/Registration" element={<Registration token={token} setToken={setToken}/>} />
-            <Route path="/SignIn" element={<SignIn token={token} setToken={setToken}/>} />
-            {/* <Route path="/UserDetail" element={<UserDetail token={token} setToken={setToken}/>} /> */}
+            <Route path="/" element={<Home token={token} setToken={setToken} userRole={userRole} setUserRole={setUserRole}/>} />
+            <Route path="/Registration" element={<Registration token={token} setToken={setToken} userRole={userRole} setUserRole={setUserRole}/>} />
+            <Route path="/SignIn" element={<SignIn token={token} setToken={setToken} userRole={userRole} setUserRole={setUserRole}/>} />
+            <Route path="/UserDetail" element={<UserDetail token={token} setToken={setToken} userRole={userRole} setUserRole={setUserRole}/>} />
             {/* <Route path="/FindEmail" element={<FindEmail token={token} setToken={setToken}/>} /> */}
             {/* <Route path="/ChangePassword" element={<ChangePassword token={token} setToken={setToken} />} /> */}
             {/* <Route path="/Order" element={<Order token={token} setToken={setToken} />} /> */}

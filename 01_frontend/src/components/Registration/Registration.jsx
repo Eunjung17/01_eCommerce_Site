@@ -3,12 +3,11 @@
     import './Registration.css';
     import { useRegisterUserMutation } from '../../redux/slices/userSlice'
 
-    export default function Registration({token, setToken}) {
+    export default function Registration({token, setToken, userRole, setUserRole}) {
 
         const navigate = useNavigate();
         const [alert, setAlert] = useState("");
         const [fadeOut, setFadeOut] = useState(false);
-        const [registerResult, setRegisterResult] = useState("");
 
         const [registerUserApi, {isLoading, error}] = useRegisterUserMutation();
         const [formData, setFormData] = useState({
@@ -40,7 +39,7 @@
 
         const userRegistration = async(e) => {
             e.preventDefault();
-            setAlert("");
+           // setAlert("");
 
             try {
                 if(formData.email && formData.firstName && formData.lastName && formData.password && formData.confirmPassword && formData.address && formData.phone && formData.userRoleId){
@@ -50,10 +49,17 @@
                     }else if(formData.password !== formData.confirmPassword) {
                         setAlert("Password and confirm password must be same.");
                         return;
-                    }else{  //possible condition to register
-                        const response = await registerUserApi(formData).unwrap();
-                        setRegisterResult(response);
-                        console.log(registerResult);
+                    }else{  //possible condition to register                         
+                        const {response} = await registerUserApi(formData).unwrap();    
+                        if(response.message){ //if same id exists,  message: "Please try again later." from backend
+                            setAlert(response.message);
+                            return;
+                        }else if(response.token){ //if user gets token after successful registration.
+                            setToken(response.token);
+                            setUserRole(response?.userInformation?.userRoleId);
+                            //navigate("/UserDetail",{state: {response, status:"afterRegister"}},);
+                            navigate("/");
+                        }
                     }
 
                 }else {
@@ -62,8 +68,13 @@
                 }
             } catch (error) {
                 console.log(error);
+                if(error && error.data && error.data.message) setAlert(error.data.message);
+                else setAlert("An error occurred, please try again.");
             }
         }
+
+        {isLoading && <output>Uploading information...</output>}
+        {error && <output>{error.message}</output>}
 
         return(
         <>

@@ -3,7 +3,7 @@ import { useState } from "react";
 import { useLoginUserMutation } from '../../redux/slices/userSlice'
 import './SignIn.css';
 
-export default function SignIn({token, setToken, userRole, setUserRole}) {
+export default function UserManage({token, setToken, userRole, setUserRole}) {
 
     const navigate = useNavigate();
     const [loginUserApi, {isLoading, error}] = useLoginUserMutation();

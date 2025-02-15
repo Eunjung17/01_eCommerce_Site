@@ -2,12 +2,12 @@ import { Link } from 'react-router-dom';
 import './Navigation.css';
 import { useNavigate } from "react-router-dom";
 
-export default function Navigation({token, setToken}) {
+export default function Navigation({token, setToken, userRole, setUserRole}) {
 
     const navigate = useNavigate();
 
-    const logOut = async () => {
-        await setToken(null);
+    const logOut = () => {
+        setToken(null);
         
         setTimeout(function(){
             navigate("/");
@@ -27,16 +27,34 @@ export default function Navigation({token, setToken}) {
         <Link to="/">About us</Link>
 
         { !token ? 
-        <>
+        (<>
             <Link to="/SignIn" style={{float:'right'}}>Sign in  </Link>
             <Link to="/Registration" style={{float:'right'}}>Register</Link>
-        </> 
-            : 
-        <>
-            <Link to="/" style={{float:'right'}}>Order History</Link>
-            <Link to="/" style={{float:'right'}}>User Profile</Link>
-            <Link to="/" style={{float:'right'}}>Log Out</Link>
-        </>
+        </>) : 
+        (<>
+            {userRole === 1 && (
+            <>
+                <Link to="/" style={{float:'right'}}>Order History</Link>
+                <Link to="/" style={{float:'right'}}>User Profile</Link>
+                <Link to="/" style={{float:'right'}} onClick={logOut}>Log Out</Link>
+            </>
+            )}
+            {userRole === 2 && (
+            <>
+                <Link to="/" style={{float:'right'}} onClick={logOut}>Log Out</Link>
+                <Link to="/" style={{float:'right'}}>User Profile</Link>
+                <Link to="/" style={{float:'right'}}>Product Management</Link>
+            </>
+            )}
+            {userRole === 3 && (
+            <>
+                <Link to="/" style={{float:'right'}} onClick={logOut}>Log Out</Link>
+                <Link to="/" style={{float:'right'}}>User Profile</Link>
+                <Link to="/" style={{float:'right'}}>User Management</Link>
+                <Link to="/" style={{float:'right'}}>Product Management</Link>
+            </>
+            )}
+        </>)
         }
         </div>
     </div>
