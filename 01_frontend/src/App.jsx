@@ -2,6 +2,7 @@ import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
 import 'bootstrap/dist/css/bootstrap.min.css';
 import './App.css'
 import Navigation from './components/Navigation/Navigation';
+import Footer from './components/Footer/Footer';
 // import Admin from './components/Admin/Admin';
 // import BusinessOwner from './components/BusinessOwner/BusinessOwner';
 // import ChangePassword from './components/ChangePassword/ChangePassword';
@@ -9,12 +10,14 @@ import Navigation from './components/Navigation/Navigation';
 import SignIn from './components/SignIn/SignIn';
 import Home from './components/Home/Home';
 // import Order from './components/Order/Order';
-// import ProductDetail from './components/ProductDetail/ProductDetail';
+import ProductDetail from './components/ProductDetail/ProductDetail';
 import Registration from './components/Registration/Registration';
-// import UserCart from './components/UserCart/UserCart';
+import UserCart from './components/UserCart/UserCart';
+// import UserCartOrder from './components/UserCart/UserCartOrder';
 import UserDetail from './components/UserDetail/UserDetail';
-// import UserOrderDetail from './components/UserOrderDetail/UserOrderDetail';
-// import UserOrderHistory from './components/UserOrderHistory/UserOrderHistory';
+import UserOrderDetail from './components/UserOrderDetail/UserOrderDetail';
+import UserOrderHistory from './components/UserOrderHistory/UserOrderHistory';
+import UserManage from './components/UserManage/UserManage';
  import { useState, useEffect } from 'react';
 
 import {store} from "./redux/store";
@@ -30,13 +33,21 @@ function App() {
   useEffect(()=>{
     if(token){
       localStorage.setItem('token', token);
-      localStorage.setItem('userRole', userRole);
     } 
     else{
       localStorage.removeItem('token');
+    }
+  },[token]);
+
+  useEffect(()=>{
+    if(userRole){
+      localStorage.setItem('userRole', parseInt(userRole));
+      console.log("sss:" , typeof(localStorage.getItem('userRole')));
+    } 
+    else{
       localStorage.removeItem('userRole');
     }
-  },[token , userRole]);
+  },[userRole]);
 
   return (
     <>
@@ -48,17 +59,20 @@ function App() {
             <Route path="/Registration" element={<Registration token={token} setToken={setToken} userRole={userRole} setUserRole={setUserRole}/>} />
             <Route path="/SignIn" element={<SignIn token={token} setToken={setToken} userRole={userRole} setUserRole={setUserRole}/>} />
             <Route path="/UserDetail" element={<UserDetail token={token} setToken={setToken} userRole={userRole} setUserRole={setUserRole}/>} />
+            <Route path="/UserManage" element={<UserManage token={token} setToken={setToken} userRole={userRole} setUserRole={setUserRole}/>} />
             {/* <Route path="/FindEmail" element={<FindEmail token={token} setToken={setToken}/>} /> */}
             {/* <Route path="/ChangePassword" element={<ChangePassword token={token} setToken={setToken} />} /> */}
             {/* <Route path="/Order" element={<Order token={token} setToken={setToken} />} /> */}
-            {/* <Route path="/UserCart" element={<UserCart token={token} setToken={setToken} />} /> */}
-            {/* <Route path="/UserOrderDetail" element={<UserOrderDetail token={token} setToken={setToken} />} /> */}
-            {/* <Route path="/UserOrderHistory" element={<UserOrderHistory token={token} setToken={setToken} />} /> */}
+            <Route path="/UserCart" element={<UserCart token={token} setToken={setToken}  userRole={userRole} setUserRole={setUserRole}/>} />
+            {/* <Route path="/UserCartOrder" element={<UserCartOrder token={token} setToken={setToken}  userRole={userRole} setUserRole={setUserRole}/>} /> */}
+            <Route path="/UserOrderDetail" element={<UserOrderDetail token={token} setToken={setToken} />} />
+            <Route path="/UserOrderHistory" element={<UserOrderHistory token={token} setToken={setToken} />} />
             {/* <Route path="/BusinessOwner" element={<BusinessOwner token={token} setToken={setToken} />} /> */}
             {/* <Route path="/Admin" element={<Admin token={token} setToken={setToken} />} /> */}
             {/* <Route path="/BusinessOwner" element={<BusinessOwner token={token} setToken={setToken} />} /> */}
-            {/* <Route path="/ProductDetail" element={<ProductDetail token={token} setToken={setToken} />} /> */}
+            <Route path="/ProductDetail" element={<ProductDetail token={token} setToken={setToken} userRole={userRole} setUserRole={setUserRole}/>} />
           </Routes>
+          <Footer path="/Footer"/>
         </Router>
       </Provider>
     </>

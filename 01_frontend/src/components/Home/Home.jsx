@@ -1,36 +1,75 @@
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import './Home.css';
-import { useNavigate } from "react-router-dom";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useGetCategoryAllQuery } from '../../redux/slices/categorySlice'
+import { useGetTop4ProductQuery } from '../../redux/slices/productSlice'
+import { useAddCartMutation } from '../../redux/slices/cartSlice'
 
-export default function Navigation({token, setToken}) {
+
+export default function Navigation({token, setToken, userRole ,setUserRole}) {
 
     const navigate = useNavigate();
-    const { data: categories, isLoading, error } = useGetCategoryAllQuery();
-    console.log(categories);
+    const { data: categories, isLoading, error } = useGetCategoryAllQuery(token);
+    const { data: top4Products, isLoading2, error2} = useGetTop4ProductQuery(token);
+    const [ addCartApi, {isLoading3, error3}] = useAddCartMutation();
 
+    const [ alert, setAlert ] = useState(null);
+
+    console.log(top4Products);
+    console.log("userRole typeof:" ,typeof(userRole));
+    
     const [activeIndex, setActiveIndex] = useState(null); 
 
     // Toggle the panel based on the index
     const togglePanel = (index) => {
+        setAlert(null);
         setActiveIndex(activeIndex === index ? null : index); // Close if already open, open if closed
     };
 
-    if (isLoading) return <div>Loading categories...</div>;
-    if (error) return <div>Error loading categories</div>;
+    const cart = async (productId, quantity) => {
+        console.log("productId: " ,productId);
+        console.log("quantity: " ,quantity);
+
+        setAlert(null);
+
+        if(!token && !userRole){
+           setAlert("Login required."); 
+        }else{
+            if(userRole === '2') setAlert("Business user can't order products."); 
+            else if(userRole === '3') setAlert("Admin user can't order products."); 
+            else{
+
+                console.log("again:" , token, " ",productId," ", quantity);
+                const response = await addCartApi({token, productId, quantity}).unwrap(); 
+
+                console.log("addCartApi response:" ,response);
+
+                navigate("/UserCart");
+            }
+        }
+    }
+
+    const order  = () => {
+
+        setAlert(null);
+        if(!token ||!userRole) setAlert("Login required.");
+        else navigate("/");
+    }
+
+    if (isLoading || isLoading2 || isLoading3) return <div>Loading categories...</div>;
+    if (error || error2 || error3) return <div>Error loading categories</div>;
 
     return(
     <>
         <div className="row">
             <div className="leftcolumn">
                 <div className="accordion0"><h3>Category</h3></div>
-            {categories.map(category => (            
+            {categories && categories.map(category => (            
                 <div key={category.id} >
                     <button className="accordion" onClick={()=>togglePanel(`index${category.id}`)}>
                         {category.name}
                     </button>
-                    {category.categoryDetail.map(detail => (
+                    {category && category.categoryDetail.map(detail => (
                         <div key={detail.id} className="panel" style={{display:activeIndex === `index${category.id}` ? 'block': 'none'}} >
                             <p>{detail.name}</p>
                         </div>
@@ -42,19 +81,43 @@ export default function Navigation({token, setToken}) {
 
             <div className="middlecolumn">
                 <div className="card">
-                <h2>TITLE HEADING</h2>
-                <h5>Title description, Dec 7, 2017</h5>
-                <div className="fakeimg" style={{height:'200px'}}>Image</div>
-                <p>Some text..</p>
-                <p>Sunt in culpa qui officia deserunt mollit anim id est laborum consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco.</p>
+                <h3>Popular Post</h3>
+            {top4Products && top4Products.length > 0 &&
+                <>
+                <h2>{top4Products[0].name}</h2>
+                <div className="fakeimg" style={{height:'220px', display:'flex'}}>
+                    <img className = "bookCoverSize" src={top4Products[0].images} alt={top4Products[0].id} />
+                    <div>
+                        <p>{top4Products[0].description}</p>
+                        <h5>${top4Products[0].price}</h5>
+                        <button type="button" className="btn btn-secondary" style={{margin: '5px'}}>Detail</button>
+                        <button className="btn btn-success" type="submit" style={{margin: '5px'}} onClick={()=>cart(top4Products[0].id, 1)}>Cart</button>
+                        <button className="btn btn-primary" type="submit" style={{margin: '5px'}} onClick={order}>Order</button>
+                        {alert && 
+                            <p>{alert}</p>
+                        }
+                    </div>
+                </div>
+                </>
+            }
                 </div>
                 <div className="card">
-                <h2>TITLE HEADING</h2>
-                <h5>Title description, Sep 2, 2017</h5>
-                <div className="fakeimg" style={{height:'200px'}}>Image</div>
-                <p>Some text..</p>
-                <p>Sunt in culpa qui officia deserunt mollit anim id est laborum consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco.</p>
+                <h3>Popular Post</h3>
+                {top4Products && top4Products.length > 1 &&
+                <>
+                <h2>{top4Products[1].name}</h2>
+                <div className="fakeimg" style={{height:'220px', display:'flex'}}>
+                    <img className = "bookCoverSize" src={top4Products[1].images} alt={top4Products[1].id} />
+                    <div>
+                        <p>{top4Products[1].description}</p>
+                        <h5>${top4Products[1].price}</h5>
+                        <button type="button" className="btn btn-secondary" style={{margin: '5px'}}>Detail</button>
+                        <button className="btn btn-success" type="submit" style={{margin: '5px'}} onClick={()=>cart(top4Products[1].id, 1)}>Cart</button>
+                        <button className="btn btn-primary" type="submit" style={{margin: '5px'}}>Order</button>
+                    </div>
                 </div>
+                </>
+            }</div>
             </div>
             <div className="rightcolumn">
                 <div className="card">
@@ -65,19 +128,41 @@ export default function Navigation({token, setToken}) {
                 </div>
                 <div className="card">
                 <h3>Popular Post</h3>
-                <div className="fakeimg"><p>Image</p></div>
-                <div className="fakeimg"><p>Image</p></div>
-                <div className="fakeimg"><p>Image</p></div>
+                {top4Products && top4Products.length > 2 &&
+                <>
+                <h2>{top4Products[2].name}</h2>
+                <div className="fakeimg" style={{height:'200px', display:'flex'}}>
+                    <img className = "bookCoverSize" src={top4Products[2].images} alt={top4Products[2].id} />
+                    <div>
+                        <p>{top4Products[2].description}</p>
+                        <h5>${top4Products[2].price}</h5>
+                        <button type="button" className="btn btn-secondary" style={{margin: '5px'}}>Detail</button>
+                        <button className="btn btn-success" type="submit" style={{margin: '5px'}} onClick={()=>cart(top4Products[2].id, 1)}>Cart</button>
+                        <button className="btn btn-primary" type="submit" style={{margin: '5px'}}>Order</button>
+                    </div>
+                </div>
+                </>
+                }
                 </div>
                 <div className="card">
-                <h3>Follow Me</h3>
-                <p>Some text..</p>
+                <h3>Popular Post</h3>
+                {top4Products && top4Products.length > 3 &&
+                <>
+                <h2>{top4Products[3].name}</h2>
+                <div className="fakeimg" style={{height:'200px', display:'flex'}}>
+                    <img className = "bookCoverSize" src={top4Products[3].images} alt={top4Products[3].id} />
+                    <div>
+                        <p>{top4Products[3].description}</p>
+                        <h5>${top4Products[3].price}</h5>
+                        <button type="button" className="btn btn-secondary" style={{margin: '5px'}}>Detail</button>
+                        <button className="btn btn-success" type="submit" style={{margin: '5px'}} onClick={()=>cart(top4Products[3].id, 1)}>Cart</button>
+                        <button className="btn btn-primary" type="submit" style={{margin: '5px'}}>Order</button>
+                    </div>
+                </div>
+                </>
+                }
                 </div>
             </div>
-        </div>
-
-        <div className="footer">
-        <h2>Footer</h2>
         </div>
     </>
     );

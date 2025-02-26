@@ -1,0 +1,144 @@
+Table "_prisma_migrations" {
+  "id" varchar(36) [pk, not null]
+  "checksum" varchar(64) [not null]
+  "finished_at" timestamptz
+  "migration_name" varchar(255) [not null]
+  "logs" text
+  "rolled_back_at" timestamptz
+  "started_at" timestamptz [not null, default: `now()`]
+  "applied_steps_count" int4 [not null, default: 0]
+}
+
+Table "User" {
+  "id" text [pk, not null]
+  "email" text [unique, not null]
+  "firstName" text [not null]
+  "lastName" text [not null]
+  "password" text [not null]
+  "address" text [not null]
+  "phone" text [not null]
+  "confirmAdmin" bool [not null]
+  "taxId" text [not null]
+  "isDeleted" bool [not null]
+  "createdAt" timestamp [not null]
+  "userRoleId" int4 [not null]
+}
+
+Table "Review" {
+  "id" text [pk, not null]
+  "createdAt" timestamp [not null]
+  "rating" int4 [not null]
+  "review" text
+  "orderDetailId" text [unique, not null]
+  "userId" text [not null]
+  "productId" text [not null]
+  "image" text [not null]
+  "isDeleted" bool [not null]
+}
+
+Table "Order" {
+  "id" text [pk, not null]
+  "userId" text [not null]
+  "createdAt" timestamp [not null]
+  "name" text [not null]
+  "address" text [not null]
+  "phone" text [not null]
+  "isDeleted" bool [not null]
+  "paymentMethodId" int4 [not null]
+}
+
+Table "Product" {
+  "id" text [pk, not null]
+  "userId" text [not null]
+  "name" text [not null]
+  "description" text
+  "price" int4 [not null]
+  "images" text
+  "quantity" int4 [not null]
+  "isDeleted" bool [not null]
+  "categoryDetailId" text [not null]
+}
+
+Table "Category" {
+  "id" text [pk, not null]
+  "name" text [unique, not null]
+  "description" text
+  "isDeleted" bool [not null]
+}
+
+Table "OrderDetail" {
+  "id" text [pk, not null]
+  "orderId" text [not null]
+  "productId" text [not null]
+  "quantity" int4 [not null]
+  "isDeleted" bool [not null]
+  "price" int4 [not null]
+}
+
+Table "Cart" {
+  "id" text [pk, not null]
+  "userId" text [unique, not null]
+  "isDeleted" bool [not null]
+}
+
+Table "CartDetail" {
+  "id" text [pk, not null]
+  "cartId" text [not null]
+  "productId" text [not null]
+  "isDeleted" bool [not null]
+  "quantity" int4 [not null]
+
+  Indexes {
+    (productId, cartId, isDeleted) [type: btree, name: "CartDetail_productId_cartId_isDeleted_key"]
+  }
+}
+
+Table "UserRole" {
+  "name" text [unique, not null]
+  "description" text
+  "isDeleted" bool [not null]
+  "id" int4 [pk, not null, increment]
+}
+
+Table "CategoryDetail" {
+  "id" text [pk, not null]
+  "categoryId" text [not null]
+  "name" text [unique, not null]
+  "description" text
+  "isDeleted" bool [not null]
+}
+
+Table "PaymentMethod" {
+  "id" int4 [pk, not null, increment]
+  "name" text [unique, not null]
+  "description" text
+  "isDeleted" bool [not null]
+}
+
+Ref "Cart_userId_fkey":"User"."id" < "Cart"."userId" [update: cascade, delete: restrict]
+
+Ref "CartDetail_cartId_fkey":"Cart"."id" < "CartDetail"."cartId" [update: cascade, delete: restrict]
+
+Ref "CartDetail_productId_fkey":"Product"."id" < "CartDetail"."productId" [update: cascade, delete: restrict]
+
+Ref "CategoryDetail_categoryId_fkey":"Category"."id" < "CategoryDetail"."categoryId" [update: cascade, delete: restrict]
+
+Ref "Order_paymentMethodId_fkey":"PaymentMethod"."id" < "Order"."paymentMethodId" [update: cascade, delete: restrict]
+
+Ref "Order_userId_fkey":"User"."id" < "Order"."userId" [update: cascade, delete: restrict]
+
+Ref "OrderDetail_orderId_fkey":"Order"."id" < "OrderDetail"."orderId" [update: cascade, delete: restrict]
+
+Ref "OrderDetail_productId_fkey":"Product"."id" < "OrderDetail"."productId" [update: cascade, delete: restrict]
+
+Ref "Product_categoryDetailId_fkey":"CategoryDetail"."id" < "Product"."categoryDetailId" [update: cascade, delete: restrict]
+
+Ref "Product_userId_fkey":"User"."id" < "Product"."userId" [update: cascade, delete: restrict]
+
+Ref "Review_orderDetailId_fkey":"OrderDetail"."id" < "Review"."orderDetailId" [update: cascade, delete: restrict]
+
+Ref "Review_productId_fkey":"Product"."id" < "Review"."productId" [update: cascade, delete: restrict]
+
+Ref "Review_userId_fkey":"User"."id" < "Review"."userId" [update: cascade, delete: restrict]
+
+Ref "User_userRoleId_fkey":"UserRole"."id" < "User"."userRoleId" [update: cascade, delete: restrict]

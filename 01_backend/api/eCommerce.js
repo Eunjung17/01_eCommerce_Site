@@ -15,6 +15,7 @@ const createToken = (id) => {
 };
 
 const isLoggedIn = async (req, res, next) => {
+
     const authHeader = req.headers.authorization;
     const token = authHeader?.slice(7);
     if (!token) return next();
@@ -58,11 +59,23 @@ router.post("/userRoleRegister", async(req, res, next) => {
   }
 });
 
+router.get("/paymentMethod/all", async(req, res, next) => {
+  try {
+
+      const response = await prisma.paymentMethod.findMany();
+      res.status(200).json(response);
+
+  } catch (error) {
+      next(error);
+  }
+});
+
 router.get("/category/all", async(req, res, next) => {
   try {
 
       const response = await prisma.category.findMany({
-        include: {categoryDetail: true},
+        where: {isDeleted : false,},
+        include: {categoryDetail: true, isDeleted : false,},
         orderBy: {id: 'asc'},
       });
       res.status(200).json(response);
@@ -105,7 +118,6 @@ router.post("/categoryDetailRegister", async(req, res, next) => {
       const existingCategoryDetail = await prisma.categoryDetail.findUnique({
           where: { name },
       });
-      console.log("existingCategoryDetail", existingCategoryDetail);
 
       if(existingCategoryDetail) return res.status(400).json({ message: "name already taken" });
       
@@ -190,6 +202,12 @@ router.post("/user/register", async(req, res, next) => {
               createdAt: new Date()
           },
       });
+      const response2 = await prisma.cart.create({
+        data: {
+            userId: response.id,
+            isDeleted: false,
+        },
+      });
 
       if(response.id){
           const token = createToken(response.id);
@@ -210,6 +228,7 @@ router.post('/user/login', async (req, res, next) => {
     const userInformation = await prisma.user.findUnique({
       where: {
         email,
+        isDeleted: false,
       },
     });
     if (!userInformation) {
@@ -224,6 +243,392 @@ router.post('/user/login', async (req, res, next) => {
     next(error);
   }
 });
+
+router.get("/user/UserInfo", isLoggedIn, async (req, res, next) => {
+
+  try {
+
+    if(!req.user){
+      return res.status(401).json({ message: "Not Authorized" });
+
+    }else{
+      
+      const response = await prisma.user.findUnique({
+          where: {
+            id: req.user.id,
+          },
+      });
+      res.status(200).json(response);
+
+    }
+  } catch (error) {
+      next(error);
+  }
+});
+
+
+router.get("/user/getCart", isLoggedIn, async (req, res, next) => {
+
+  try {
+
+    if(!req.user){
+      return res.status(401).json({ message: "Not Authorized" });
+
+    }else{
+    
+
+      const cart = await prisma.cart.findUnique({
+        where: { userId: req.user.id },
+      });
+      
+      const response = await prisma.cartDetail.findMany({
+        where: {
+          isDeleted: false,
+          cartId: cart.id,
+        },
+        include: {
+          cart: true,
+          product: {
+            include: {
+              categoryDetail: {
+                include: {
+                  category: true,
+                }
+              }
+            }
+          },
+        },
+      });
+
+      res.status(200).json(response);
+
+    }
+  } catch (error) {
+      next(error);
+  }
+});
+
+// router.get("/user/orderHistory", isLoggedIn, async (req, res, next) => {
+// console.log("history!");
+//   try {
+
+//     if(!req.user){
+//       return res.status(401).json({ message: "Not Authorized" });
+
+//     }else{
+    
+
+//       const response = await prisma.orderDetail.findMany({
+//         where: {
+//           order: {
+//             userId: req.user.id, 
+//             isDeleted: false,
+//           },
+//           isDeleted: false,
+//         },
+//         include: {
+//           order: {
+//             include: {
+//               paymentMethod: true,
+//             },
+
+//           }, 
+//           product: true,
+//         },
+//       });
+// console.log("orderHistory response:", response);
+//       res.status(200).json(response);
+
+//     }
+//   } catch (error) {
+//       next(error);
+//   }
+// });
+
+router.get("/user/orderHistory", isLoggedIn, async (req, res, next) => {
+
+  try {
+
+    if(!req.user){
+      return res.status(401).json({ message: "Not Authorized" });
+
+    }else{
+
+      const response = await prisma.order.findMany({
+        where: {
+          userId: req.user.id,
+          isDeleted: false,
+        },
+        include: {
+          orderDetails: {
+            include: {
+              product: {
+                include: {
+                  categoryDetail: {
+                    include: {
+                      category: true,
+                    },
+                  },
+                },
+              },
+            },
+          },
+          paymentMethod: true,
+        },
+      });
+      console.log("response: history:", response);
+      res.status(200).json(response);
+
+    }
+  } catch (error) {
+      next(error);
+  }
+});
+
+
+router.post('/user/addCart', isLoggedIn, async (req, res, next) => {
+  try {
+
+    if(!req.user){
+      return res.status(401).json({ message: "Not Authorized" });
+
+    }else{
+    
+      const { productId, quantity } = req.body;
+
+      const cart = await prisma.cart.findFirst({
+          where: {
+            userId: req.user.id,
+            isDeleted: false,
+          }
+      });
+
+      if(!cart){
+        return res.status(404).json({message: "Cart not found"});
+      }
+
+      const product = await prisma.product.findFirst({
+        where: {
+          id: productId,
+          isDeleted: false,
+        },
+        select: {
+          price: true,
+        },
+      });
+
+      const response = await prisma.cartDetail.upsert({
+
+        where: {
+          productId_cartId_isDeleted: {
+            productId: productId,
+            cartId: cart.id,
+            isDeleted: false,
+          },
+        },
+        update: {
+          quantity: {
+            increment: +quantity,
+          },
+        },
+        create: {
+            quantity: +quantity,
+            price: +product.price,
+            isDeleted: false,
+            cart: {
+              connect: {
+                id: cart.id,
+              },
+            },
+            product: {
+              connect: {
+                id: productId,
+              },
+            },
+        },
+    });
+
+    res.status(200).json(response);
+    }
+
+  } catch (error) {
+    next(error);
+  }
+});
+
+
+
+// change quantity number in product table
+//create order detail, order, delete cartDetail, move to order confirm page
+router.post('/user/registerOrderFromCart', isLoggedIn, async (req, res, next) => {
+
+    try {
+
+      if(!req.user){
+        return res.status(401).json({ message: "Not Authorized" });
+  
+      }else{
+      
+        const { orderData } = req.body;
+
+
+        const cartDetails = await prisma.cartDetail.findMany({
+          where: {
+            cart: {
+              userId: req.user.id,
+              isDeleted: false,
+            },
+            isDeleted: false,
+          },
+        });
+
+        if(cartDetails.length === 0) return res.status(400).json({ message: "no Cart Info" });
+
+        let quantityCheckFlag = true;
+
+        //before create Order, check if product quantity is enough to order
+        for (const cartDetail of cartDetails) {
+          const product = await prisma.product.findUnique({
+            where: {
+              id: cartDetail.productId,
+            },
+            select: {
+              quantity: true,
+            },
+          });
+
+          if( cartDetail.quantity > product.quantity) quantityCheckFlag = false;
+
+        }
+
+        if(quantityCheckFlag === false){
+          return res.status(400).json({ message: "The product quantity is not sufficient to order." });
+        }
+        
+        const orderResponse = await prisma.order.create({
+            data: {
+              createdAt : new Date(),
+              name: orderData.newName,
+              address: orderData.newAddress,
+              phone: orderData.newPhone,
+              paymentMethod: {
+                connect: {
+                  id: +orderData.paymentMethod,
+                },
+              },
+              isDeleted : false,
+              user: {
+                connect: {
+                  id: req.user.id, 
+                },
+              },
+            },
+        });
+
+  
+        // 1. If successfully Order created, 
+        //    - update Product quantity to minus
+        //    - Order Details should be created.
+        // 2. Delete cartDetails
+        if(orderResponse.id){
+
+          for (const cartDetail of cartDetails) {
+
+            await prisma.product.update({
+              where: {
+                id: cartDetail.productId,
+              },
+              data: {
+                quantity: {
+                  decrement: cartDetail.quantity,
+                },
+              },
+            });
+
+            await prisma.orderDetail.create({
+                  data: {
+                    orderId: orderResponse.id,
+                    productId: cartDetail.productId,
+                    quantity: cartDetail.quantity,
+                    price: cartDetail.price,
+                    isDeleted : false,
+                  },
+              });
+          };
+
+          const cart = await prisma.cart.findUnique({
+            where: {
+              userId: req.user.id,
+            },
+            select: {
+              id: true,
+            },
+          });
+
+
+          if(cart){
+            await prisma.cartDetail.deleteMany({
+              where: {
+                cartId: cart.id,
+                isDeleted: false,
+              },
+            });
+          }
+
+        }else res.status(400).json({  message: "Please try again later." });
+  
+        res.status(200).json(orderResponse);
+      }
+  
+    } catch (error) {
+      next(error);
+    }
+});
+
+router.post("/user/orderDetail", isLoggedIn, async (req, res, next) => {
+
+  try {
+
+    const { orderId } = req.body;
+
+    if(!req.user){
+      return res.status(401).json({ message: "Not Authorized" });
+
+    }else{
+
+      const response = await prisma.order.findUnique({
+        where: {
+          id: orderId,
+          userId: req.user.id,
+          isDeleted: false,
+        },
+        include: {
+          orderDetails: {
+            include: {
+              product: {
+                include: {
+                  categoryDetail: {
+                    include: {
+                      category: true,
+                    },
+                  },
+                },
+              },
+            },
+          },
+          paymentMethod: true,
+        },
+      });
+
+      res.status(200).json(response);
+
+    }
+  } catch (error) {
+      next(error);
+  }
+});
+
+
 
 router.post("/product/register", async(req, res, next) => {
   try {
@@ -261,14 +666,121 @@ router.post("/product/register", async(req, res, next) => {
   }
 });
 
-router.get("/admin/userAll", async (req, res, next) => {
+router.get("/product/selectItems", isLoggedIn, async(req, res, next) => {
+  try {
+    if(!req.user){
+      return res.status(401).json({ message: "Not Authorized" });
+
+    }else{
+      
+      const response = await prisma.product.findMany();
+      res.status(200).json(response);
+    }
+  } catch (error) {
+      next(error);
+  }
+});
+
+router.get("/admin/userRole", isLoggedIn, async (req, res, next) => {
+  try {
+    if(!req.user){
+      return res.status(401).json({ message: "Not Authorized" });
+
+    }else{
+      
+      const response = await prisma.userRole.findMany({
+          where: {
+              id : {notIn: [3],},
+          },
+          orderBy: {id: 'asc'},
+      });
+      res.status(200).json(response);
+    }
+  } catch (error) {
+      next(error);
+  }
+});
+
+router.get("/admin/allUsers", isLoggedIn, async (req, res, next) => {
 
   try {
 
+    if(!req.user){
+      return res.status(401).json({ message: "Not Authorized" });
+
+    }else{
+      
       const response = await prisma.user.findMany({
           where: {
-              userRoleId : {in: [2,3],},
+              userRoleId : {notIn: [3],},
+          },
+      });
+      res.status(200).json(response);
+
+    }
+  } catch (error) {
+      next(error);
+  }
+});
+
+router.put('/admin/userConfirm', isLoggedIn, async (req, res, next) => {
+  try {
+
+    if(!req.user){
+      return res.status(401).json({ message: "Not Authorized" });
+
+    }else{
+    
+      const { userId } = req.body;
+
+      const response = await prisma.user.update({
+          where: {
+              id: userId,
+          },
+          data: {
+              confirmAdmin: true,
           }
+      });
+      res.status(200).json(response);
+    }
+
+  } catch (error) {
+    next(error);
+  }
+});
+
+router.get("/business/allProducts", isLoggedIn, async (req, res, next) => {
+
+  try {
+
+    if(!req.user){
+      return res.status(401).json({ message: "Not Authorized" });
+
+    }else{
+      
+      const response = await prisma.product.findMany({
+          where: {
+              userId : req.user.id,
+          },
+      });
+      res.status(200).json(response);
+
+    }
+  } catch (error) {
+      next(error);
+  }
+});
+
+router.get("/top4Products", async (req, res, next) => {
+
+  try {
+
+      const response = await prisma.product.findMany({
+          // where: {
+          //     userId : req.user.id,
+          // },
+          orderBy: {id: 'asc'},
+          take: 4, // Limit the result to 4 products
       });
       res.status(200).json(response);
 
@@ -276,3 +788,63 @@ router.get("/admin/userAll", async (req, res, next) => {
       next(error);
   }
 });
+
+router.post("/business/createProduct", isLoggedIn, async(req, res, next) => {
+  try {
+
+    if(!req.user){
+      return res.status(401).json({ message: "Not Authorized" });
+
+    }else{
+      
+      const { userId, name, categoryDetailId, description, price, images, quantity } = req.body;
+
+      const existingUserRole = await prisma.product.findMany({
+          where: { name },
+      });
+
+      if(existingUserRole.length > 0) return res.status(400).json({ message: "name already taken" });
+      
+      const response = await prisma.product.create({
+          data: {
+            userId,
+            name,
+            categoryDetailId,
+            description,
+            price: +price,
+            images,
+            quantity: +quantity,
+            isDeleted : false,
+          },
+      });
+
+      if(response.id) res.status(201).json(response); 
+      else res.status(400).json({  message: "Please try again later." });
+
+    }
+
+  } catch (error) {
+      next(error);
+  }
+});
+
+router.get("/business/allProducts", isLoggedIn, async (req, res, next) => {
+
+  try {
+
+    if(!req.user){
+      return res.status(401).json({ message: "Not Authorized" });
+
+    }else{
+      
+      const response = await prisma.product.findMany({
+        where: { id: req.user.id },
+      });
+      res.status(200).json(response);
+
+    }
+  } catch (error) {
+      next(error);
+  }
+});
+

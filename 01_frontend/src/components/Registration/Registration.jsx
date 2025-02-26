@@ -1,5 +1,5 @@
     import { Link, useNavigate } from "react-router-dom";
-    import { useState } from "react";
+    import { useState, useEffect } from "react";
     import './Registration.css';
     import { useRegisterUserMutation } from '../../redux/slices/userSlice'
 
@@ -10,6 +10,7 @@
         const [fadeOut, setFadeOut] = useState(false);
 
         const [registerUserApi, {isLoading, error}] = useRegisterUserMutation();
+
         const [formData, setFormData] = useState({
             email: '',
             firstName: '',
@@ -50,14 +51,16 @@
                         setAlert("Password and confirm password must be same.");
                         return;
                     }else{  //possible condition to register                         
-                        const {response} = await registerUserApi(formData).unwrap();    
+                        const response = await registerUserApi(formData).unwrap(); 
+                        console.log("response:" ,response)   
+                        console.log("response?.response.userRoleId.toString(): ", response?.userInformation?.userRoleId.toString());
+
                         if(response.message){ //if same id exists,  message: "Please try again later." from backend
                             setAlert(response.message);
                             return;
                         }else if(response.token){ //if user gets token after successful registration.
                             setToken(response.token);
-                            setUserRole(response?.userInformation?.userRoleId);
-                            //navigate("/UserDetail",{state: {response, status:"afterRegister"}},);
+                            setUserRole(response?.response.userRoleId.toString());
                             navigate("/");
                         }
                     }
@@ -93,7 +96,7 @@
                     <form onSubmit={userRegistration}>
                         <div className="mb-3">
                             <label htmlFor="email" className="form-label">Email Address</label>
-                            <input type="email" className="form-control" id="email" name="email" placeholder="Enter your email" value={formData.email} onChange={handleChange} required/>
+                            <input type="email" className="form-control" id="email" name="email" placeholder="Enter your email" value={formData.email} onChange={handleChange} autoComplete="current-email" required/>
                         </div>
                         <div className="mb-3">
                             <label htmlFor="name" className="form-label">Name</label>
@@ -104,11 +107,11 @@
                         </div>
                         <div className="mb-3">
                             <label htmlFor="password" className="form-label">Password</label>
-                            <input type="password" className="form-control" id="password" name="password" placeholder="Create a password" value={formData.password} onChange={handleChange} required/>
+                            <input type="password" className="form-control" id="password" name="password" placeholder="Create a password" value={formData.password} onChange={handleChange} autoComplete="current-id" required/>
                         </div>
                         <div className="mb-3">
                             <label htmlFor="confirm-password" className="form-label">Confirm Password</label>
-                            <input type="password" className="form-control" id="confirmPassword" name="confirmPassword" placeholder="Confirm your password" value={formData.confirmPassword} onChange={handleChange} required/>
+                            <input type="password" className="form-control" id="confirmPassword" name="confirmPassword" placeholder="Confirm your password" value={formData.confirmPassword} onChange={handleChange} autoComplete="current-password" required/>
                         </div>
 
                         <div className="mb-3">

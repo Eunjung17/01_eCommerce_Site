@@ -32,26 +32,27 @@ export default function Navigation({token, setToken, userRole, setUserRole}) {
             <Link to="/Registration" style={{float:'right'}}>Register</Link>
         </>) : 
         (<>
-            {userRole === 1 && (
+            {userRole && userRole === '1' && (
             <>
-                <Link to="/" style={{float:'right'}}>Order History</Link>
+                <Link to="/UserOrderHistory" style={{float:'right'}}>Order History</Link>
                 <Link to="/" style={{float:'right'}}>User Profile</Link>
+                <Link to="/UserCart" style={{float:'right'}}>Cart</Link>
                 <Link to="/" style={{float:'right'}} onClick={logOut}>Log Out</Link>
             </>
             )}
-            {userRole === 2 && (
+            {userRole &&  userRole === '2' && (
             <>
                 <Link to="/" style={{float:'right'}} onClick={logOut}>Log Out</Link>
                 <Link to="/" style={{float:'right'}}>User Profile</Link>
-                <Link to="/" style={{float:'right'}}>Product Management</Link>
+                <Link to="/ProductDetail" style={{float:'right'}}>Product Management</Link>
             </>
             )}
-            {userRole === 3 && (
+            {userRole &&  userRole === '3' && (
             <>
                 <Link to="/" style={{float:'right'}} onClick={logOut}>Log Out</Link>
                 <Link to="/" style={{float:'right'}}>User Profile</Link>
-                <Link to="/" style={{float:'right'}}>User Management</Link>
-                <Link to="/" style={{float:'right'}}>Product Management</Link>
+                <Link to="/UserManage" style={{float:'right'}}>User Management</Link>
+                <Link to="/ProductDetail" style={{float:'right'}}>Product Management</Link>
             </>
             )}
         </>)

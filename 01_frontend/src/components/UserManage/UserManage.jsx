@@ -1,67 +1,153 @@
-import { Link, useNavigate } from "react-router-dom";
+/* eslint-disable react/prop-types */
+import React from 'react';
+import { Link } from 'react-router-dom';
+import { useNavigate } from "react-router-dom";
 import { useState } from "react";
-import { useLoginUserMutation } from '../../redux/slices/userSlice'
-import './SignIn.css';
+import { useGetUserRoleQuery, useGetAllUserQuery, useConfirmUserMutation } from '../../redux/slices/userSlice'
+import './UserManage.css';
 
 export default function UserManage({token, setToken, userRole, setUserRole}) {
-
     const navigate = useNavigate();
-    const [loginUserApi, {isLoading, error}] = useLoginUserMutation();
-    const [formData, setFormData] = useState({
-        email: '',
-        password: '',
-    });
+    const { data: userRoles, isLoading1, error1 } = useGetUserRoleQuery(token);
+    const { data: allUsers, isLoading2, error2 } = useGetAllUserQuery(token);
+    const [confirmUser] = useConfirmUserMutation();
 
-    const userLogin = async (event) => {
-        event.preventDefault();
-     
-         try {
-           
-            if(formData.email && formData.password){
+    const [activeIndex, setActiveIndex] = useState(null); 
+    const[userRoleId, setUserRoleId] = useState(null);
+    const[userDetailId, setUserDetailId] = useState(null);
 
-             const response = await loginUserApi(formData).unwrap();
+    const users = (allUsers || []).filter((p)=>{return p.userRoleId === parseInt(userRoleId)});
 
-             if(response.token){ //login try, and then get token
-               setToken(response.token);
-               setUserRole(response?.userInformation?.userRoleId);
-               navigate("/");
-             }
-           }
-           
-         } catch (error) {
-           console.log("error:" , error?.data?.message);
-         }
-    }
+    const userDetail = (allUsers || []).filter((p)=>{return p.id === userDetailId});
 
-    const handleChange = (e) => {
-        setFormData({...formData, [e.target.name]: e.target.value});
-    }
+    // Toggle the panel based on the index
+    const togglePanel = (index) => {
+        setUserRoleId(index);
+        setActiveIndex(activeIndex === index ? null : index); // Close if already open, open if closed
+    };
+
+    const eventAcceptUser = async (userId) => {
+ 
+        if(userId){
+            //const {data: response} = await confirmUser({token, userId}).unwrap();
+            const response = await confirmUser({token, userId}).unwrap();
+            console.log(response);
+        }
+    };
+
+    const eventUserDetail = (userId) => {
+        setUserDetailId(userId);
+    };
+
+
+    if (isLoading1 || isLoading2) return <div>Loading categories...</div>;
+    if (error1 || error2) return <div>Error loading categories</div>;
 
     return(
-    <>
-        <div className="signIn-form-whole">
-            <div className="signIn-form">
-                <div className="form-header">
-                    <h2>Sign In</h2>
-                    <p>Sign in to get started!</p>
-                </div>
-                <form onSubmit={userLogin}>
-                    <div className="mb-3">
-                        <label htmlFor="email" className="form-label">Email Address</label>
-                        <input type="email" className="form-control" name="email" id="email" value={formData.email} onChange={handleChange} placeholder="Enter your email" required/>
+        <>
+            <div className="row">
+                <div className="leftcolumn">
+                    <div className="accordion0"><h3>User Role</h3></div>
+                    {userRoles && userRoles.map(userRole => (            
+                    <div key={userRole.id} >
+                        <button className="accordion" onClick={()=>togglePanel(`${userRole.id}`)}>
+                            {userRole.description}
+                        </button>
                     </div>
-                    <div className="mb-3">
-                        <label htmlFor="password" className="form-label">Password</label>
-                        <input type="password" className="form-control" name="password" id="password" value={formData.password} onChange={handleChange} placeholder="Enter your password" required/>
-                    </div>
-                    <button type="submit" className="btn btn-custom w-100">Sign In</button>
-                </form>
-                <div className="text-muted">
-                    Don't have an account?  <Link to="/Registration">Create an account</Link>
+                    ))}
                 </div>
-                <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    
+                <div className="middlecolumn">
+                    <div className="card">
+                    <div style={{display:'flex',float:'right',margin:'20px'}}>
+                            <input className="form-control mr-sm-2" type="search" placeholder="Search" aria-label="Search" style={{ marginRight: '10px' }} />
+                            <button className="btn btn-outline-success my-2 my-sm-0" type="submit">Search</button>
+                    </div>
+                    <div><h3>User List</h3></div>
+                    {!activeIndex && 
+                        <p>Click one of user roles to see user details</p>
+                    }
+
+                   
+                    <table className="table table-hover" style={{display:activeIndex === `${userRoleId}` ? 'block': 'none'}}>
+                            <thead>
+                                <tr>
+                                    <th scope="col"><h5>Email</h5></th>
+                                    <th scope="col"><h5>Accept User</h5></th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                            {users && users.map(user => (   
+                                <tr key={user.id}>
+                                    <td className="user-email" onClick={()=>eventUserDetail(`${user.id}`)}>{user.email}</td>
+                                    <td>
+                                        {user.confirmAdmin === false ? 
+                                        <button className="btn btn-outline-secondary" type="submit" onClick={()=>eventAcceptUser(`${user.id}`)}>Accept</button>
+                                        :
+                                        <div>Accepted</div>
+                                        }
+                                    </td>
+                                </tr>
+                            ))}
+                            </tbody>
+                    </table>         
+                    
+                    </div>
+                </div> 
+                <div className="rightcolumn">
+
+
+                    <div className="card">
+
+                        <table className="table table-hover">
+                            <thead>
+                                <tr>
+                                <th scope="col"><h5>Info.</h5></th>
+                                <th scope="col"><h5>Detail</h5></th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                            {userDetail && userDetail.map(user => (  
+                                <React.Fragment key={user.id}> 
+                                <tr> 
+                                <th scope="row">Email</th>
+                                <th scope="row">{user.email}</th>
+                                </tr>
+                                <tr> 
+                                <th scope="row">Name</th>
+                                <th scope="row">{user.firstName}, {user.lastName}</th>
+                                </tr>
+                                <tr> 
+                                <th scope="row">Address</th>
+                                <th scope="row">{user.address}</th>
+                                </tr>
+                                <tr> 
+                                <th scope="row">Phone</th>
+                                <th scope="row">{user.phone}</th>
+                                </tr>
+                                <tr> 
+                                <th scope="row">Admin confirmed</th>
+                                <th scope="row">{user && user.confirmAdmin === false ? 'No' : 'Yes'}</th>
+                                </tr>
+                                <tr> 
+                                <th scope="row">taxId</th>
+                                <th scope="row">{user && user.taxId === "" ? 'None' : user.taxId}</th>
+                                </tr>
+                                <tr> 
+                                <th scope="row">isDeleted</th>
+                                <th scope="row">{user && user.isDeleted === false ? 'No' : 'Yes'}</th>
+                                </tr>
+                                </React.Fragment>
+                            ))}
+                            </tbody>
+                        </table> 
+
+
+
+
+                    </div>
+                </div>
             </div>
-        </div>
-    </>
-    );
+        </>
+        );
 }

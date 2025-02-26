@@ -1,67 +1,136 @@
-.signIn-form-whole {
-    background: linear-gradient(135deg, #6a11cb, #2575fc);
-    color: #fff;
-    min-height: 100vh;
-    width: 100vw;  
-    display: flex;
-    justify-content: center;
-    align-items: center;
-  }
-
-.signIn-form {
-    margin-top: 2%;
-    margin-bottom: 30% !important;
-    background: #ffffff;
-    color: #000;
-    padding: 2rem;
-    border-radius: 10px;
-    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-    max-width: 1000px;
+/* Style the buttons that are used to open and close the accordion panel */
+.accordion0 {
+    background-color: #eee;
+    color: #181616;
+    margin-top: 10px;
+    padding: 18px;
     width: 100%;
-}
-
-.form-control:focus {
-    box-shadow: 0 0 10px rgba(38, 143, 255, 0.5);
-    border-color: #268fff;
-}
-.form-header {
-    text-align: center;
-    margin-bottom: 1.5rem;
-}
-.form-header h2 {
-    font-weight: bold;
-}
-.form-header p {
-    font-size: 0.9rem;
-    color: #6c757d;
-}
-.btn-custom {
-    background: linear-gradient(135deg, #6a11cb, #2575fc);
-    color: #fff;
+    text-align: left;
     border: none;
-    transition: background 0.3s ease;
-}
-.btn-custom:hover {
-    background: linear-gradient(135deg, #2575fc, #6a11cb);
-}
-.text-muted {
-    font-size: 0.8rem;
-    text-align: center;
-    margin-top: 1rem;
-}
-.name {
-    display: flex;
+    outline: none;
+    transition: 0.4s;
+  }
+  
+  .accordion {
+    background-color: #eee;
+    color: #444;
+    cursor: pointer;
+    padding: 18px;
+    width: 100%;
+    text-align: left;
+    border: none;
+    outline: none;
+    transition: 0.4s;
+  }
+  
+  /* Add a background color to the button if it is clicked on (add the .active class with JS), and when you move the mouse over it (hover) */
+  .active, .accordion:hover {
+    background-color: #ccc;
+  }
+  
+  /* Style the accordion panel. Note: hidden by default */
+  .panel {
+    padding: 0 18px;
+    background-color: white;
+    display: none;
+    overflow: hidden;
+  }
+    /* Create two unequal columns that floats next to each other */
+    /* Left column */
+    .leftcolumn {   
+      float: left;
+      width: 15%;
+    }
+    .middlecolumn {   
+      float: left;
+      width: 35%;
+    }
+    
+    /* Right column */
+    .rightcolumn {
+      float: left;
+      width: 50%;
+      background-color: #f1f1f1;
+      padding-left: 20px;
+    }
+    
+    /* Fake image */
+    .fakeimg {
+      background-color: #aaa;
+      width: 100%;
+      padding: 20px;
+    }
+    
+    /* Add a card effect for articles */
+    .card {
+      background-color: white;
+      padding: 20px;
+      margin-top: 20px;
+    }
+    
+    /* Clear floats after the columns */
+    .row::after {
+      content: "";
+      display: table;
+      clear: both;
+    }
+
+    /* Style the buttons that are used to open and close the accordion panel */
+.accordion0 {
+  background-color: #eee;
+  color: #181616;
+  margin-top: 10px;
+  padding: 18px;
+  width: 100%;
+  text-align: left;
+  border: none;
+  outline: none;
+  transition: 0.4s;
 }
 
-.user-type{
-    display: flex;
-    margin-bottom: 2%;
+.accordion {
+  background-color: #eee;
+  color: #444;
+  cursor: pointer;
+  padding: 18px;
+  width: 100%;
+  text-align: left;
+  border: none;
+  outline: none;
+  transition: 0.4s;
 }
 
-.user-type .form-check-label {
-    margin-right: 50px; 
+.user-email:hover {
+  color: blue;
 }
 
-.name input:first-child {
-    margin-right: 7%;
+.user-email {
+  cursor: pointer; 
+  user-select: none; 
 }
+
+/* Add a background color to the button if it is clicked on (add the .active class with JS), and when you move the mouse over it (hover) */
+.active, .accordion:hover {
+  background-color: #ccc;
+}
+
+/* Style the accordion panel. Note: hidden by default */
+.panel {
+  /* padding: 0 18px; */
+  background-color: white;
+  display: none;
+  overflow: hidden;
+}
+    
+    /* Responsive layout - when the screen is less than 800px wide, make the two columns stack on top of each other instead of next to each other */
+    @media screen and (max-width: 800px) {
+      .middlecolumn, .rightcolumn {   
+        width: 100%;
+        padding: 0;
+      }
+    }
+    
+    /* Responsive layout - when the screen is less than 400px wide, make the navigation links stack on top of each other instead of next to each other */
+    @media screen and (max-width: 400px) {
+  
+    }
