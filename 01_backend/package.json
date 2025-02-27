@@ -4,10 +4,7 @@
   "main": "index.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
-    "seed1": "node seed1.js",
-    "seed2": "node seed2.js",
-    "seed3": "node seed3.js",
-    "seed4": "node seed4.js",
+    "seed": "node seed.js",
     "dev": "nodemon index.js"
   },
   "keywords": [],

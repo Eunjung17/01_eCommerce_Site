@@ -10,6 +10,7 @@ import Footer from './components/Footer/Footer';
 import SignIn from './components/SignIn/SignIn';
 import Home from './components/Home/Home';
 // import Order from './components/Order/Order';
+import ProductCategoryList from './components/ProductCategoryList/ProductCategoryList';
 import ProductDetail from './components/ProductDetail/ProductDetail';
 import Registration from './components/Registration/Registration';
 import UserCart from './components/UserCart/UserCart';
@@ -70,6 +71,7 @@ function App() {
             {/* <Route path="/BusinessOwner" element={<BusinessOwner token={token} setToken={setToken} />} /> */}
             {/* <Route path="/Admin" element={<Admin token={token} setToken={setToken} />} /> */}
             {/* <Route path="/BusinessOwner" element={<BusinessOwner token={token} setToken={setToken} />} /> */}
+            <Route path="/ProductCategoryList" element={<ProductCategoryList token={token} setToken={setToken} userRole={userRole} setUserRole={setUserRole}/>} />
             <Route path="/ProductDetail" element={<ProductDetail token={token} setToken={setToken} userRole={userRole} setUserRole={setUserRole}/>} />
           </Routes>
           <Footer path="/Footer"/>

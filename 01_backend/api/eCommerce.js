@@ -666,6 +666,33 @@ router.post("/product/register", async(req, res, next) => {
   }
 });
 
+router.post("/category/product", async(req, res, next) => {
+  try {
+
+      const { categoryDetailId } = req.body;
+      console.log("start categoryDetailId", categoryDetailId);     
+      const response = await prisma.categoryDetail.findMany({
+          where: {
+            id: categoryDetailId,
+          },
+          include: {
+            product: true,
+            category: true,
+          },
+      });
+      console.log("start response", response); 
+      if (response && response.length > 0) {
+          res.status(201).json(response);
+      }else{
+          res.status(400).json({  message: "Please try again later." });
+      }
+
+
+  } catch (error) {
+      next(error);
+  }
+});
+
 router.get("/product/selectItems", isLoggedIn, async(req, res, next) => {
   try {
     if(!req.user){
@@ -761,6 +788,13 @@ router.get("/business/allProducts", isLoggedIn, async (req, res, next) => {
       const response = await prisma.product.findMany({
           where: {
               userId : req.user.id,
+          },
+          include: {
+            categoryDetail: {
+              include: {
+                category: true,
+              },
+            },
           },
       });
       res.status(200).json(response);

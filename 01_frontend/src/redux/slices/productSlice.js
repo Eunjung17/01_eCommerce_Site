@@ -27,9 +27,24 @@ const productSlice = api.injectEndpoints({
             providesTags:["product"],
         }),
 
+        productFromCategory: builder.mutation({
+            query: ({token, categoryDetailId }) => ({
+                url:"/category/product",
+                method: "POST",
+                // headers: {
+                //     'Content-Type': 'application/json',  
+                //     'Authorization' : `Bearer ${token}`,
+                // },
+                body: {
+                    categoryDetailId,
+                },
+            }),
+            invalidatesTags: ["product"],
+          }),
+
     }),  
   });
 
   
-  export const { useGetAllProductQuery, useGetTop4ProductQuery } = productSlice;
+  export const { useGetAllProductQuery, useGetTop4ProductQuery, useProductFromCategoryMutation } = productSlice;
   export default productSlice;

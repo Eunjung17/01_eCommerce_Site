@@ -14,6 +14,7 @@ export default function Navigation({token, setToken, userRole ,setUserRole}) {
     const [ addCartApi, {isLoading3, error3}] = useAddCartMutation();
 
     const [ alert, setAlert ] = useState(null);
+    const [fadeOut, setFadeOut] = useState(false);
 
     console.log(top4Products);
     console.log("userRole typeof:" ,typeof(userRole));
@@ -25,6 +26,15 @@ export default function Navigation({token, setToken, userRole ,setUserRole}) {
         setAlert(null);
         setActiveIndex(activeIndex === index ? null : index); // Close if already open, open if closed
     };
+
+    const handleClose = () => {
+
+        setFadeOut(true);
+        setTimeout(() => {
+            setAlert("");
+            setFadeOut(false);
+        }, 600);
+    }
 
     const cart = async (productId, quantity) => {
         console.log("productId: " ,productId);
@@ -56,6 +66,16 @@ export default function Navigation({token, setToken, userRole ,setUserRole}) {
         else navigate("/");
     }
 
+    const categoryDetailSelection  = (e, id) => {
+        e.preventDefault();
+        console.log("categoryDetailSelection id: ", id);
+        setAlert(null);
+        navigate("/ProductCategoryList", {
+            state: {categoryDetailId: id}
+        });
+    }
+
+
     if (isLoading || isLoading2 || isLoading3) return <div>Loading categories...</div>;
     if (error || error2 || error3) return <div>Error loading categories</div>;
 
@@ -71,7 +91,7 @@ export default function Navigation({token, setToken, userRole ,setUserRole}) {
                     </button>
                     {category && category.categoryDetail.map(detail => (
                         <div key={detail.id} className="panel" style={{display:activeIndex === `index${category.id}` ? 'block': 'none'}} >
-                            <p>{detail.name}</p>
+                            <p><a onClick={(e)=>categoryDetailSelection(e,detail.id)}>{detail.name}</a></p>
                         </div>
                     ))}
     
@@ -93,8 +113,11 @@ export default function Navigation({token, setToken, userRole ,setUserRole}) {
                         <button type="button" className="btn btn-secondary" style={{margin: '5px'}}>Detail</button>
                         <button className="btn btn-success" type="submit" style={{margin: '5px'}} onClick={()=>cart(top4Products[0].id, 1)}>Cart</button>
                         <button className="btn btn-primary" type="submit" style={{margin: '5px'}} onClick={order}>Order</button>
-                        {alert && 
-                            <p>{alert}</p>
+                        {alert &&
+                            <div id="notification" className={`alert warning ${fadeOut ? 'fade-out' : ''}`} onClick={handleClose}>
+                                <span className="closebtn">&times;</span>  
+                                <strong>Warning!</strong> {alert}
+                            </div>
                         }
                     </div>
                 </div>

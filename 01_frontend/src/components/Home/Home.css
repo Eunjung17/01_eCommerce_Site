@@ -36,6 +36,11 @@
   background-color: #ccc;
 }
 
+.panel:hover {
+  cursor: pointer;  
+  color: blue;
+}
+
 /* Style the accordion panel. Note: hidden by default */
 .panel {
   padding: 0 18px;
