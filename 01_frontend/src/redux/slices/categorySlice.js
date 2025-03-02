@@ -4,13 +4,13 @@ const categorySlice = api.injectEndpoints({
     endpoints: (builder) => ({
 
         getCategoryAll: builder.query({
-            query: (token)=> ({
+            query: ()=> ({
                 url: `/category/all`,
                 method:"GET",
-                headers: {
-                'Content-Type': 'application/json',  
-                'Authorization' : `Bearer ${token}`,
-            },
+            //     headers: {
+            //     'Content-Type': 'application/json',  
+            //     'Authorization' : `Bearer ${token}`,
+            // },
             }),
             providesTags:["category"],
         }),

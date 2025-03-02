@@ -6,7 +6,9 @@ export default function Footer() {
     return(
     <>
         <div className="footer">
-        <h2>Footer</h2>
+        <h6>Get email offers & the latest news from our eCommerce Market! &nbsp; <Link to="/Registration" ><button type="button" className="btn btn-primary">Sign in</button></Link>
+        </h6>
+        
         </div>
     </>
     );

@@ -1,7 +1,7 @@
 /* eslint-disable react/prop-types */
 import React from 'react';
 import { Link, useNavigate, useParams, useLocation } from 'react-router-dom';
-import { useState, useEffect, useMemo  } from "react";
+import { useState, useEffect  } from "react";
 import { useOrderDetailsMutation } from "../../redux/slices/orderSlice";
 
 
@@ -9,11 +9,11 @@ import './UserOrderDetail.css';
 
 export default function UserOrderDetail({token, setToken, userRole, setUserRole}) {
 
-    // const { orderId } = useParams();
     const navigate = useNavigate();
     const location = useLocation();
     const { orderId = null } = location.state || {};
     console.log("orderId in UserOrderDetail: ", orderId);
+    console.log("token in UserOrderDetail: ", token);
 
     const [ orderDetail, {isLoading, error}] = useOrderDetailsMutation();
     const [ alert, setAlert ] = useState(null);

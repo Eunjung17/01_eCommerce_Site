@@ -234,7 +234,7 @@ const seed = async () => {
         });
 
         // Add products for each category detail
-        for (let i = 0; i < 2; i++) {
+        for (let i = 0; i < 10; i++) {
           const price = Math.floor(Math.random() * (500 - 10 + 1)) + 10;
 
           // Assign a random user as the creator of the product
@@ -247,7 +247,7 @@ const seed = async () => {
               description: faker.commerce.productDescription(),
               price,
               images: faker.image.avatarGitHub(),
-              quantity: Math.floor(Math.random() * 100) + 1,
+              quantity: 1000,
               isDeleted: false,
               userId: randomUser.id,
             },

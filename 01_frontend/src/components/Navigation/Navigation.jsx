@@ -14,17 +14,18 @@ export default function Navigation({token, setToken, userRole, setUserRole}) {
         },1000);
     }
 
+
     return(
     <>
     <div className="top">
     <div className="header">
         <h1>E-Commerce Market</h1>
-        <p>Resize the browser window to see the effect.</p>
+        <p>Free shipping on orders over $50.</p>
         </div>
 
         <div className="topnav">
         <Link to="/">Home</Link>
-        <Link to="/">About us</Link>
+        <Link to="/AboutUs">About us</Link>
 
         { !token ? 
         (<>

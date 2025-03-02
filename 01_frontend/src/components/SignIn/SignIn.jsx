@@ -21,9 +21,10 @@ export default function SignIn({token, setToken, userRole, setUserRole}) {
             if(formData.email && formData.password){
 
              const response = await loginUserApi(formData).unwrap();
+             console.log(response.token, ":", response?.userInformation?.userRoleId.toString());
 
              if(response.token){ //login try, and then get token
-               setToken(response.token);
+               setToken(response?.token);
                setUserRole(response?.userInformation?.userRoleId.toString());
                navigate("/");
              }

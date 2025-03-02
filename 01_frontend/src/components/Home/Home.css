@@ -56,7 +56,7 @@
   }
   .middlecolumn {   
     float: left;
-    width: 50%;
+    width: 40%;
   }
   
   /* Right column */
@@ -88,6 +88,21 @@
     clear: both;
   }
   
+  .closebtn {
+    margin-left: 15px;
+    color: white;
+    font-weight: bold;
+    float: right;
+    font-size: 22px;
+    line-height: 20px;
+    cursor: pointer;
+    transition: 0.3s;
+  }
+  
+  .closebtn:hover {
+    color: black;
+  }
+
   /* Responsive layout - when the screen is less than 800px wide, make the two columns stack on top of each other instead of next to each other */
   @media screen and (max-width: 800px) {
     .middlecolumn, .rightcolumn {   

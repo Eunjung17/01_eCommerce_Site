@@ -9,17 +9,18 @@ import { useAddCartMutation } from '../../redux/slices/cartSlice'
 export default function Navigation({token, setToken, userRole ,setUserRole}) {
 
     const navigate = useNavigate();
-    const { data: categories, isLoading, error } = useGetCategoryAllQuery(token);
-    const { data: top4Products, isLoading2, error2} = useGetTop4ProductQuery(token);
+    const { data: categories, isLoading, error } = useGetCategoryAllQuery();
+    const { data: top4Products, isLoading2, error2} = useGetTop4ProductQuery();
     const [ addCartApi, {isLoading3, error3}] = useAddCartMutation();
 
     const [ alert, setAlert ] = useState(null);
     const [fadeOut, setFadeOut] = useState(false);
 
     console.log(top4Products);
-    console.log("userRole typeof:" ,typeof(userRole));
     
     const [activeIndex, setActiveIndex] = useState(null); 
+    const [searchKeyword, setSearchKeyword] = useState(""); 
+    const [showModal, setShowModal] = useState(false);
 
     // Toggle the panel based on the index
     const togglePanel = (index) => {
@@ -27,6 +28,62 @@ export default function Navigation({token, setToken, userRole ,setUserRole}) {
         setActiveIndex(activeIndex === index ? null : index); // Close if already open, open if closed
     };
 
+
+    const cart = async (productId, quantity) => {
+
+        setAlert(null);
+
+        if(!token){
+            return openModal();
+        }
+
+        console.log(typeof(userRole));
+
+        if(userRole === '2') setAlert("Business user can't order products."); 
+        else if(userRole === '3') setAlert("Admin user can't order products."); 
+        else{
+
+            console.log("again:" , token, " ",productId," ", quantity);
+            const response = await addCartApi({token, productId, quantity}).unwrap(); 
+
+            navigate("/UserCart");
+        }
+
+    }
+
+    
+    const search  = () => {
+
+        setAlert(null);
+            navigate("/SearchProduct", {state: {searchKeyword: searchKeyword}});
+    }
+
+    const order  = async(productId, quantity) => {
+
+        setAlert(null);
+
+
+        if(!token){
+            return openModal();
+        }
+        else if(userRole === '2') return setAlert("Business user can't order products."); 
+        else if(userRole === '3') return setAlert("Admin user can't order products."); 
+        else{
+
+            console.log("productId category:" ,productId);
+            navigate("/SingleOrder", {state: {productId:productId}});
+        }
+    }
+
+    const categoryDetailSelection  = (e, id) => {
+        e.preventDefault();
+        setAlert(null);
+        navigate("/ProductCategoryList", {
+            state: {categoryDetailId: id}
+        });
+    }
+
+    
     const handleClose = () => {
 
         setFadeOut(true);
@@ -36,52 +93,59 @@ export default function Navigation({token, setToken, userRole ,setUserRole}) {
         }, 600);
     }
 
-    const cart = async (productId, quantity) => {
-        console.log("productId: " ,productId);
-        console.log("quantity: " ,quantity);
 
-        setAlert(null);
 
-        if(!token && !userRole){
-           setAlert("Login required."); 
-        }else{
-            if(userRole === '2') setAlert("Business user can't order products."); 
-            else if(userRole === '3') setAlert("Admin user can't order products."); 
-            else{
+    const openModal = () => setShowModal(true);
 
-                console.log("again:" , token, " ",productId," ", quantity);
-                const response = await addCartApi({token, productId, quantity}).unwrap(); 
-
-                console.log("addCartApi response:" ,response);
-
-                navigate("/UserCart");
-            }
-        }
-    }
-
-    const order  = () => {
-
-        setAlert(null);
-        if(!token ||!userRole) setAlert("Login required.");
-        else navigate("/");
-    }
-
-    const categoryDetailSelection  = (e, id) => {
-        e.preventDefault();
-        console.log("categoryDetailSelection id: ", id);
-        setAlert(null);
-        navigate("/ProductCategoryList", {
-            state: {categoryDetailId: id}
-        });
-    }
-
+    const closeModal = () => setShowModal(false);
 
     if (isLoading || isLoading2 || isLoading3) return <div>Loading categories...</div>;
     if (error || error2 || error3) return <div>Error loading categories</div>;
 
     return(
     <>
+
+
+    <div>
+      {showModal && (
+        <div className="modal" tabIndex="-1" role="dialog" style={{ display: 'block' }}>
+          <div className="modal-dialog" role="document">
+            <div className="modal-content">
+              <div className="modal-header">
+                <h5 className="modal-title">Message</h5>
+                {/* <button type="button" className="close" onClick={()=>closeModal()} aria-label="Close">
+                  <span aria-hidden="true">&times;</span>
+                </button> */}
+              </div>
+              <div className="modal-body">
+                <p>You should log in to use this menu.</p>
+              </div>
+              <div className="modal-footer">
+                <Link to="/SignIn" style={{float:'right'}}>
+                    <button type="button" className="btn btn-primary">Sign in</button> 
+                </Link>
+                <Link to="/Registration" style={{float:'right'}}>
+                    <button type="button" className="btn btn-primary">Register</button>
+                </Link>
+                <button type="button" className="btn btn-secondary" onClick={()=>closeModal()}>Cancel</button>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+    </div>
+
+
         <div className="row">
+
+
+            {alert &&
+                            <div id="notification" className={`alert warning ${fadeOut ? 'fade-out' : ''}`} onClick={handleClose}>
+                                <span className="closebtn">&times;</span>  
+                                <strong>Warning!</strong> {alert}
+                            </div>
+            }
+
             <div className="leftcolumn">
                 <div className="accordion0"><h3>Category</h3></div>
             {categories && categories.map(category => (            
@@ -100,6 +164,7 @@ export default function Navigation({token, setToken, userRole ,setUserRole}) {
             </div>
 
             <div className="middlecolumn">
+
                 <div className="card">
                 <h3>Popular Post</h3>
             {top4Products && top4Products.length > 0 &&
@@ -112,13 +177,7 @@ export default function Navigation({token, setToken, userRole ,setUserRole}) {
                         <h5>${top4Products[0].price}</h5>
                         <button type="button" className="btn btn-secondary" style={{margin: '5px'}}>Detail</button>
                         <button className="btn btn-success" type="submit" style={{margin: '5px'}} onClick={()=>cart(top4Products[0].id, 1)}>Cart</button>
-                        <button className="btn btn-primary" type="submit" style={{margin: '5px'}} onClick={order}>Order</button>
-                        {alert &&
-                            <div id="notification" className={`alert warning ${fadeOut ? 'fade-out' : ''}`} onClick={handleClose}>
-                                <span className="closebtn">&times;</span>  
-                                <strong>Warning!</strong> {alert}
-                            </div>
-                        }
+                        <button className="btn btn-primary" type="submit" style={{margin: '5px'}} onClick={()=>order(top4Products[0].id, 1)}>Order</button>
                     </div>
                 </div>
                 </>
@@ -136,7 +195,7 @@ export default function Navigation({token, setToken, userRole ,setUserRole}) {
                         <h5>${top4Products[1].price}</h5>
                         <button type="button" className="btn btn-secondary" style={{margin: '5px'}}>Detail</button>
                         <button className="btn btn-success" type="submit" style={{margin: '5px'}} onClick={()=>cart(top4Products[1].id, 1)}>Cart</button>
-                        <button className="btn btn-primary" type="submit" style={{margin: '5px'}}>Order</button>
+                        <button className="btn btn-primary" type="submit" style={{margin: '5px'}} onClick={()=>order(top4Products[1].id, 1)}>Order</button>
                     </div>
                 </div>
                 </>
@@ -145,8 +204,8 @@ export default function Navigation({token, setToken, userRole ,setUserRole}) {
             <div className="rightcolumn">
                 <div className="card">
                     <div style={{display:'flex',float:'right',margin:'20px'}}>
-                        <input className="form-control mr-sm-2" type="search" placeholder="Search" aria-label="Search" style={{ marginRight: '10px' }} />
-                        <button className="btn btn-outline-success my-2 my-sm-0" type="submit">Search</button>
+                        <input className="form-control mr-sm-2" name="search" value={searchKeyword} onChange={(e)=>setSearchKeyword(e.target.value)} type="search" placeholder="Search" aria-label="Search" style={{ marginRight: '10px' }} />
+                        <button className="btn btn-outline-success my-2 my-sm-0" type="submit" onClick={search}>Search</button>
                     </div>
                 </div>
                 <div className="card">
@@ -161,7 +220,7 @@ export default function Navigation({token, setToken, userRole ,setUserRole}) {
                         <h5>${top4Products[2].price}</h5>
                         <button type="button" className="btn btn-secondary" style={{margin: '5px'}}>Detail</button>
                         <button className="btn btn-success" type="submit" style={{margin: '5px'}} onClick={()=>cart(top4Products[2].id, 1)}>Cart</button>
-                        <button className="btn btn-primary" type="submit" style={{margin: '5px'}}>Order</button>
+                        <button className="btn btn-primary" type="submit" style={{margin: '5px'}} onClick={()=>order(top4Products[2].id, 1)}>Order</button>
                     </div>
                 </div>
                 </>
@@ -179,7 +238,7 @@ export default function Navigation({token, setToken, userRole ,setUserRole}) {
                         <h5>${top4Products[3].price}</h5>
                         <button type="button" className="btn btn-secondary" style={{margin: '5px'}}>Detail</button>
                         <button className="btn btn-success" type="submit" style={{margin: '5px'}} onClick={()=>cart(top4Products[3].id, 1)}>Cart</button>
-                        <button className="btn btn-primary" type="submit" style={{margin: '5px'}}>Order</button>
+                        <button className="btn btn-primary" type="submit" style={{margin: '5px'}} onClick={()=>order(top4Products[3].id, 1)}>Order</button>
                     </div>
                 </div>
                 </>

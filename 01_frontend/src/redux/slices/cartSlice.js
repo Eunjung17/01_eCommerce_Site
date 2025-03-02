@@ -16,26 +16,36 @@ const cartSlice = api.injectEndpoints({
         }),
 
         addCart: builder.mutation({
-            query: ({ token, productId, quantity }) => {
-            //   console.log('token:', token); // Log the token
-            //   console.log('userData:', productId); // Log the userData
-            //   console.log('quantity:', quantity); // Log the userData
-              
-              return {
-                url: "/user/addCart",
-                method: "POST",
-                headers: {
-                  'Content-Type': 'application/json',
-                  'Authorization': `Bearer ${token}`,
-                },
-                body: { productId, quantity },
-              };
-            },
-            invalidatesTags: ["cart"],
-          }),
+          query: ({ token, productId, quantity }) => {
+            return {
+              url: "/user/addCart",
+              method: "POST",
+              headers: {
+                'Content-Type': 'application/json',
+                'Authorization': `Bearer ${token}`,
+              },
+              body: { productId, quantity },
+            };
+          },
+          invalidatesTags: ["cart"], 
+        }),
+
+        deleteCart: builder.mutation({
+          query: ({ token }) => {
+            return {
+              url: "/user/delete/Cart",
+              method: "DELETE",
+              headers: {
+                'Content-Type': 'application/json',
+                'Authorization': `Bearer ${token}`,
+              },
+            };
+          },
+          invalidatesTags: ["cart"], 
+        }),
 
     }),  
   });
   
-  export const { useGetCartAllQuery, useAddCartMutation } = cartSlice;
+  export const { useGetCartAllQuery, useAddCartMutation, useDeleteCartMutation } = cartSlice;
   export default cartSlice;

@@ -15,26 +15,35 @@ const productSlice = api.injectEndpoints({
             providesTags:["product"],
         }),
 
+        getAllDeletedProduct: builder.query({
+          query: (token)=> ({
+              url: `/business/allDeletedProducts`,
+              method:"GET",
+              headers: {
+              'Content-Type': 'application/json',  
+              'Authorization' : `Bearer ${token}`,
+          },
+          }),
+          providesTags:["product"],
+      }),
+
+
         getTop4Product: builder.query({
-            query: (token)=> ({
+            query: ()=> ({
                 url: `/top4Products`,
                 method:"GET",
-                headers: {
-                'Content-Type': 'application/json',  
-                'Authorization' : `Bearer ${token}`,
-            },
+            //     headers: {
+            //     'Content-Type': 'application/json',  
+            //     'Authorization' : `Bearer ${token}`,
+            // },
             }),
             providesTags:["product"],
         }),
 
         productFromCategory: builder.mutation({
-            query: ({token, categoryDetailId }) => ({
+            query: ({categoryDetailId }) => ({
                 url:"/category/product",
                 method: "POST",
-                // headers: {
-                //     'Content-Type': 'application/json',  
-                //     'Authorization' : `Bearer ${token}`,
-                // },
                 body: {
                     categoryDetailId,
                 },
@@ -42,9 +51,72 @@ const productSlice = api.injectEndpoints({
             invalidatesTags: ["product"],
           }),
 
+          
+        deleteProduct: builder.mutation({
+          query: ({token, productId }) => ({
+              url:"/business/delete/product",
+              method: "PUT",
+              headers: {
+              'Content-Type': 'application/json',  
+              'Authorization' : `Bearer ${token}`,
+              },
+              body: {
+                productId,
+              }, 
+          }),
+          invalidatesTags: ["product"],
+        }),
+
+        recoveryProduct: builder.mutation({
+          query: ({token, id }) => ({
+              url:"/business/recovery/product",
+              method: "PUT",
+              headers: {
+              'Content-Type': 'application/json',  
+              'Authorization' : `Bearer ${token}`,
+              },
+              body: {
+                id,
+              }, 
+          }),
+          invalidatesTags: ["product"],
+        }),
+
+
+          productFromKeyword: builder.mutation({
+            query: ({searchKeyword}) => {
+              console.log("searchKeyword:" ,searchKeyword);
+                return {
+                  url:"/keyword/product",
+                  method: "POST",
+                  body: { searchKeyword},
+                };
+
+            },
+            invalidatesTags: ["product"],
+          }),
+
+
+
+          singleProduct: builder.mutation({
+            query: ({ token, productId }) => {
+                console.log("print",token, ">>>" , productId);
+              return {
+                url: "/user/singleProduct",
+                method: "POST",
+                headers: {
+                  'Content-Type': 'application/json',
+                  'Authorization': `Bearer ${token}`,
+                },
+                body: { productId },
+              };
+            },
+            invalidatesTags: ["product"],
+          }),
+
     }),  
   });
 
   
-  export const { useGetAllProductQuery, useGetTop4ProductQuery, useProductFromCategoryMutation } = productSlice;
+  export const { useGetAllProductQuery, useGetTop4ProductQuery, useProductFromCategoryMutation, useSingleProductMutation, useProductFromKeywordMutation, useDeleteProductMutation, useGetAllDeletedProductQuery, useRecoveryProductMutation } = productSlice;
   export default productSlice;

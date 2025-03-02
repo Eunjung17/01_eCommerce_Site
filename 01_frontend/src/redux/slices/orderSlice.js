@@ -40,9 +40,26 @@ const orderSlice = api.injectEndpoints({
               invalidatesTags: ["order"],
         }),
 
-        orderDetails: builder.mutation({
+      registerSingleOrder: builder.mutation({
+        query: ({ token, orderData }) => {
+          console.log("orderSlice:", token , "::", orderData);
+          return {
+            url: "/user/register/singleOrder",
+            method: "POST",
+            headers: {
+              'Content-Type': 'application/json',
+              'Authorization': `Bearer ${token}`,
+            },
+            body: { orderData },
+          };
+        },
+        invalidatesTags: ["order"], 
+      }),
+
+
+      orderDetails: builder.mutation({
             query: ({token, orderId}) => {
-              
+              console.log("!!", token, "!!" , orderId);
               return {
                 url: "/user/orderDetail",
                 method: "POST",
@@ -59,5 +76,5 @@ const orderSlice = api.injectEndpoints({
     }),  
   });
   
-  export const { useGetPaymentMethodQuery, useGetOrderHistoryQuery , useRegisterOrderFromCartMutation, useOrderDetailsMutation } = orderSlice;
+  export const { useGetPaymentMethodQuery, useGetOrderHistoryQuery , useRegisterOrderFromCartMutation, useRegisterSingleOrderMutation, useOrderDetailsMutation } = orderSlice;
   export default orderSlice;
