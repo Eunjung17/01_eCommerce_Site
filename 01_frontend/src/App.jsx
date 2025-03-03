@@ -4,10 +4,6 @@ import './App.css'
 import Navigation from './components/Navigation/Navigation';
 import AboutUs from './components/AboutUs/AboutUs';
 import Footer from './components/Footer/Footer';
-// import Admin from './components/Admin/Admin';
-// import BusinessOwner from './components/BusinessOwner/BusinessOwner';
-// import ChangePassword from './components/ChangePassword/ChangePassword';
-// import FindEmail from './components/FindEmail/FindEmail';
 import SingleProduct from './components/SingleProduct/SingleProduct';
 import SearchProduct from './components/SearchProduct/SearchProduct';
 import SignIn from './components/SignIn/SignIn';
@@ -78,16 +74,11 @@ function App() {
             <Route path="/UserProfile" element={<UserProfile token={token} setToken={setToken} userRole={userRole} setUserRole={setUserRole}/>} />
             <Route path="/UserDetail" element={<UserDetail token={token} setToken={setToken} userRole={userRole} setUserRole={setUserRole}/>} />
             <Route path="/UserManage" element={<UserManage token={token} setToken={setToken} userRole={userRole} setUserRole={setUserRole}/>} />
-            {/* <Route path="/FindEmail" element={<FindEmail token={token} setToken={setToken} userRole={userRole} setUserRole={setUserRole}/>} /> */}
-            {/* <Route path="/ChangePassword" element={<ChangePassword token={token} setToken={setToken} userRole={userRole} setUserRole={setUserRole} />} /> */}
             <Route path="/SingleOrder" element={<SingleOrder token={token} setToken={setToken} userRole={userRole} setUserRole={setUserRole}/>} />
             <Route path="/UserCart" element={<UserCart token={token} setToken={setToken}  userRole={userRole} setUserRole={setUserRole}/>} />
             <Route path="/UserCartOrder" element={<UserCartOrder token={token} setToken={setToken}  userRole={userRole} setUserRole={setUserRole}/>} />
             <Route path="/UserOrderDetail" element={<UserOrderDetail token={token} setToken={setToken} />} />
             <Route path="/UserOrderHistory" element={<UserOrderHistory token={token} setToken={setToken} />} />
-            {/* <Route path="/BusinessOwner" element={<BusinessOwner token={token} setToken={setToken} />} /> */}
-            {/* <Route path="/Admin" element={<Admin token={token} setToken={setToken} userRole={userRole} setUserRole={setUserRole} />} /> */}
-            {/* <Route path="/BusinessOwner" element={<BusinessOwner token={token} setToken={setToken} userRole={userRole} setUserRole={setUserRole} />} /> */}
             <Route path="/ProductCategoryList" element={<ProductCategoryList token={token} setToken={setToken} userRole={userRole} setUserRole={setUserRole}/>} />
             <Route path="/ProductManage" element={<ProductManage token={token} setToken={setToken} userRole={userRole} setUserRole={setUserRole}/>} />
           </Routes>
