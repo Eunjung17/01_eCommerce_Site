@@ -108,7 +108,7 @@ const seed = async () => {
 
       // Admin user (userRoleId: 3)
       {
-        email: "admin@admin.com",
+        email: "admin@admin",
         firstName: "Admin",
         lastName: "User",
         password: "admin",
@@ -137,7 +137,7 @@ const seed = async () => {
             address: user.address,
             phone: user.phone,
             userRoleId: user.userRoleId,
-            confirmAdmin: user.userRoleId === 3 ? true : false,
+            confirmAdmin: true,//user.userRoleId === 3 ? true : false,
             taxId: user.taxId,
             isDeleted: false,
             createdAt: new Date(),

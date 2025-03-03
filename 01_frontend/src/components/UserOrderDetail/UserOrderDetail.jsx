@@ -12,8 +12,6 @@ export default function UserOrderDetail({token, setToken, userRole, setUserRole}
     const navigate = useNavigate();
     const location = useLocation();
     const { orderId = null } = location.state || {};
-    console.log("orderId in UserOrderDetail: ", orderId);
-    console.log("token in UserOrderDetail: ", token);
 
     const [ orderDetail, {isLoading, error}] = useOrderDetailsMutation();
     const [ alert, setAlert ] = useState(null);
@@ -25,13 +23,13 @@ export default function UserOrderDetail({token, setToken, userRole, setUserRole}
 
     useEffect(() => {
         
-        console.log("orderId && token: ", orderId ," ", token);
+
         if(orderId && token){
             const fetchOrderDetails = async () => {
 
                 try {
                     const response = await orderDetail({token, orderId}).unwrap(); 
-                    console.log("orderDetail response: ", response);
+
                     setOrderData(response);
 
                 } catch (error) {
@@ -83,12 +81,12 @@ export default function UserOrderDetail({token, setToken, userRole, setUserRole}
                                 </tr>
                                 <tr>
                                 <th scope="col">+ Phone</th>
-                                <th scope="col">$ {orderData && orderData?.phone}</th>
+                                <th scope="col"> {orderData && orderData?.phone}</th>
                                 </tr>
                                 <tr>
                                 <th scope="col">+ Total Price</th>
                                 <th scope="col">
-                                    {orderData && orderData.orderDetails && orderData.orderDetails.reduce((total,order)=>{
+                                    $ {orderData && orderData.orderDetails && orderData.orderDetails.reduce((total,order)=>{
                                         return total + (parseInt(order.price)*parseInt(order.quantity));
                                     },0)}
                                 </th>

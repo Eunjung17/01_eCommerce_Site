@@ -2,45 +2,45 @@
 import React from 'react';
 import { Link, useNavigate, useLocation } from 'react-router-dom';
 import { useState, useEffect  } from "react";
-import { useProductFromKeywordMutation } from '../../redux/slices/productSlice'
+import { useSingleProductMutation } from '../../redux/slices/productSlice'
 import { useAddCartMutation } from '../../redux/slices/cartSlice'
 
-import './SearchProduct.css';
+import './SingleProduct.css';
 
-export default function SearchProduct({token, setToken, userRole, setUserRole}) {
+export default function SingleProduct({token, setToken, userRole, setUserRole}) {
     const navigate = useNavigate();
     const location = useLocation();
-    const { searchKeyword = null } = location.state || {};
-    console.log("searchKeyword: ", searchKeyword);
+    const { productId = null } = location.state || {};
 
     const [ addCartApi, {isLoading2, error2}] = useAddCartMutation();
-    const [ products, {isLoading, error}] = useProductFromKeywordMutation();
-    const [keywordData, setKeywordData] = useState(null);
+    const [ singleProductAPI, {isLoading, error}] = useSingleProductMutation();
+    const [ singleProduct, setSingleProduct ] = useState(null);
     const [ alert, setAlert ] = useState(null);
     const [fadeOut, setFadeOut] = useState(false);
     const [showModal, setShowModal] = useState(false);
 
     useEffect(() => {
         
-        console.log("searchKeyword", searchKeyword);
-        if(searchKeyword){
-            const fetchOrderDetails = async () => {
+        console.log("productId!!", productId);
+        if(productId){
+            const fetchProductDetails = async () => {
 
                 try {
-                    const response = await products({searchKeyword}).unwrap(); 
-                    console.log("response: ", response);
-                    setKeywordData(response);
 
+                    const response = await singleProductAPI({token, productId}).unwrap(); 
+
+                    setSingleProduct(response);
+                    
                 } catch (error) {
                     setAlert("something wrong.");
                     console.log(error);
                 }
         };
 
-        fetchOrderDetails();
+        fetchProductDetails();
         }
 
-    }, [searchKeyword, token]);
+    }, [productId, token, singleProductAPI]);
 
     const handleClose = () => {
 
@@ -81,6 +81,8 @@ export default function SearchProduct({token, setToken, userRole, setUserRole}) 
         else if(userRole === '2') return setAlert("Business user can't order products."); 
         else if(userRole === '3') return setAlert("Admin user can't order products."); 
         else{
+
+            console.log("productId category:" ,productId);
             navigate("/SingleOrder", {state: {productId:productId}});
         }
     }
@@ -152,37 +154,61 @@ export default function SearchProduct({token, setToken, userRole, setUserRole}) 
                     </div>
                 }
 
-                    <table className="table table-hover">
+
+
+
+
+
+                    {/* <div style={{display:'flex',float:'right',margin:'20px'}}>
+                        <input className="form-control mr-sm-2" type="search" placeholder="Search" aria-label="Search" style={{ marginRight: '10px' }} />
+                        <button className="btn btn-outline-success my-2 my-sm-0" type="submit">Search</button>
+                    </div> */}
+<table className="table table-hover">
                             <thead>
-                            <tr>
-                                <th scope="col">Category</th>
-                                <th scope="col">Name</th>
-                                <th scope="col">Image</th>
-                                <th scope="col">Description</th>
-                                <th scope="col">Price</th>
-                                <th scope="col">Add to Cart</th>
-                                <th scope="col">Buy Now</th>
-                            </tr>
-                            </thead>
-                            <tbody className="table-group-divider">
-                            {isLoading && <tr><td colSpan="6">Loading Cart...</td></tr>}
-                            {!isLoading && keywordData ? (
-                                keywordData.map((p) => (
-                                <tr key={p.id}>
-                                    <th scope="row">{p?.categoryDetail?.category?.name} &gt; {p?.categoryDetail?.name}</th>
-                                    <th scope="row">{p?.name}</th>
-                                    <td><img className = "bookCoverSize" src={p?.images} alt={p.id} /></td>
-                                    <td><h6>{p?.description}</h6></td>
-                                    <td><h6>$ {p?.price}</h6></td>
-                                    <td><button className="btn btn-success" type="submit" style={{margin: '5px'}} onClick={()=>cart(p.id, 1)}>Cart</button></td>
-                                    <td><button className="btn btn-primary" type="submit" style={{margin: '5px'}}onClick={()=>order(p.id, 1)}>Order</button></td>
+                                <tr>
+                                <th scope="col"><h5>Info.</h5></th>
+                                <th scope="col"><h5>Detail</h5></th>
                                 </tr>
-                                    ))
-                                    ) : (
-                                    <tr><td colSpan="6">There is no product.</td></tr>
-                                )}
+                            </thead>
+                            <tbody>
+                            {!isLoading && singleProduct ? 
+                                <React.Fragment key={singleProduct.id}> 
+                                <tr> 
+                                <th scope="row">Main Category</th>
+                                <th scope="row">{singleProduct?.categoryDetail?.category?.name}</th>
+                                </tr>
+                                <tr> 
+                                <th scope="row">Sub Category</th>
+                                <th scope="row">{singleProduct?.categoryDetail?.name}</th>
+                                </tr>
+                                <tr> 
+                                <th scope="row">Product Name</th>
+                                <th scope="row">{singleProduct?.name}</th>
+                                </tr>
+                                <tr> 
+                                <th scope="row">Image</th>
+                                <th scope="row"><img className = "bookCoverSize" src={singleProduct?.images} alt={singleProduct.id} /></th>
+                                </tr>
+                                <tr> 
+                                <th scope="row">Description</th>
+                                <th scope="row">{singleProduct?.description}</th>
+                                </tr>
+                                <tr> 
+                                <th scope="row">Price</th>
+                                <th scope="row">$ {singleProduct?.price}</th>
+                                </tr>
+                                </React.Fragment>
+                            : (<tr><td colSpan="7">There is no product.</td></tr>)
+                        }
+                                <tr> 
+                                    <th colSpan = "2" scope="row">
+                                        <button className="btn btn-success" type="submit" style={{margin: '5px'}} onClick={()=>cart(singleProduct.id, 1)}>Cart</button>
+                                        <button className="btn btn-primary" type="submit" style={{margin: '5px'}}onClick={()=>order(singleProduct.id, 1)}>Order</button>
+                                    </th>
+                                </tr>
+
                             </tbody>
-                        </table>
+                        </table> 
 
                             
                             

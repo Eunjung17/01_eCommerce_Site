@@ -3,14 +3,14 @@ import React from 'react';
 import { Link } from 'react-router-dom';
 import { useNavigate } from "react-router-dom";
 import { useState } from "react";
-import { useGetUserRoleQuery, useGetAllUserQuery, useConfirmUserMutation } from '../../redux/slices/userSlice'
+import { useGetUserRoleQuery, useGetAllUserQuery, useAccessChangeUserMutation } from '../../redux/slices/userSlice'
 import './UserManage.css';
 
 export default function UserManage({token, setToken, userRole, setUserRole}) {
     const navigate = useNavigate();
     const { data: userRoles, isLoading1, error1 } = useGetUserRoleQuery(token);
     const { data: allUsers, isLoading2, error2 } = useGetAllUserQuery(token);
-    const [confirmUser] = useConfirmUserMutation();
+    const [accessChangeUser, {isLoading3, error3}] = useAccessChangeUserMutation();
 
     const [activeIndex, setActiveIndex] = useState(null); 
     const[userRoleId, setUserRoleId] = useState(null);
@@ -30,7 +30,7 @@ export default function UserManage({token, setToken, userRole, setUserRole}) {
  
         if(userId){
             //const {data: response} = await confirmUser({token, userId}).unwrap();
-            const response = await confirmUser({token, userId}).unwrap();
+            const response = await accessChangeUser({token, userId}).unwrap();
             console.log(response);
         }
     };
@@ -40,8 +40,8 @@ export default function UserManage({token, setToken, userRole, setUserRole}) {
     };
 
 
-    if (isLoading1 || isLoading2) return <div>Loading categories...</div>;
-    if (error1 || error2) return <div>Error loading categories</div>;
+    if (isLoading1 || isLoading2 || isLoading3) return <div>Loading categories...</div>;
+    if (error1 || error2 || error3) return <div>Error loading categories</div>;
 
     return(
         <>
@@ -51,7 +51,7 @@ export default function UserManage({token, setToken, userRole, setUserRole}) {
                     {userRoles && userRoles.map(userRole => (            
                     <div key={userRole.id} >
                         <button className="accordion" onClick={()=>togglePanel(`${userRole.id}`)}>
-                            {userRole.description}
+                            {userRole.name}
                         </button>
                     </div>
                     ))}
@@ -59,10 +59,10 @@ export default function UserManage({token, setToken, userRole, setUserRole}) {
     
                 <div className="middlecolumn">
                     <div className="card">
-                    <div style={{display:'flex',float:'right',margin:'20px'}}>
+                    {/* <div style={{display:'flex',float:'right',margin:'20px'}}>
                             <input className="form-control mr-sm-2" type="search" placeholder="Search" aria-label="Search" style={{ marginRight: '10px' }} />
                             <button className="btn btn-outline-success my-2 my-sm-0" type="submit">Search</button>
-                    </div>
+                    </div> */}
                     <div><h3>User List</h3></div>
                     {!activeIndex && 
                         <p>Click one of user roles to see user details</p>
@@ -73,7 +73,8 @@ export default function UserManage({token, setToken, userRole, setUserRole}) {
                             <thead>
                                 <tr>
                                     <th scope="col"><h5>Email</h5></th>
-                                    <th scope="col"><h5>Accept User</h5></th>
+                                    <th scope="col"><h5>Access Status</h5></th>
+                                    <th scope="col"><h5>Change</h5></th>
                                 </tr>
                             </thead>
                             <tbody>
@@ -81,10 +82,19 @@ export default function UserManage({token, setToken, userRole, setUserRole}) {
                                 <tr key={user.id}>
                                     <td className="user-email" onClick={()=>eventUserDetail(`${user.id}`)}>{user.email}</td>
                                     <td>
-                                        {user.confirmAdmin === false ? 
-                                        <button className="btn btn-outline-secondary" type="submit" onClick={()=>eventAcceptUser(`${user.id}`)}>Accept</button>
+                                        {user.confirmAdmin === true ? 
+                                        
+                                        <h5>Access</h5>
                                         :
-                                        <div>Accepted</div>
+                                        <h5>Denied</h5>
+                                        }
+                                    </td>
+                                    <td>
+                                        {user.confirmAdmin === true ? 
+                                        
+                                        <button className="btn btn-outline-secondary" type="submit" onClick={()=>eventAcceptUser(`${user.id}`)}>Accept to Deny</button>
+                                        :
+                                        <button className="btn btn-outline-secondary" type="submit" onClick={()=>eventAcceptUser(`${user.id}`)}>Deny to Accept</button>
                                         }
                                     </td>
                                 </tr>
@@ -126,8 +136,8 @@ export default function UserManage({token, setToken, userRole, setUserRole}) {
                                 <th scope="row">{user.phone}</th>
                                 </tr>
                                 <tr> 
-                                <th scope="row">Admin confirmed</th>
-                                <th scope="row">{user && user.confirmAdmin === false ? 'No' : 'Yes'}</th>
+                                <th scope="row">Access Status</th>
+                                <th scope="row">{user && user.confirmAdmin === false ? 'Denied' : 'Accept'}</th>
                                 </tr>
                                 <tr> 
                                 <th scope="row">taxId</th>

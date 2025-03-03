@@ -85,7 +85,7 @@ const productSlice = api.injectEndpoints({
 
           productFromKeyword: builder.mutation({
             query: ({searchKeyword}) => {
-              console.log("searchKeyword:" ,searchKeyword);
+
                 return {
                   url:"/keyword/product",
                   method: "POST",
@@ -100,7 +100,7 @@ const productSlice = api.injectEndpoints({
 
           singleProduct: builder.mutation({
             query: ({ token, productId }) => {
-                console.log("print",token, ">>>" , productId);
+
               return {
                 url: "/user/singleProduct",
                 method: "POST",
@@ -114,9 +114,24 @@ const productSlice = api.injectEndpoints({
             invalidatesTags: ["product"],
           }),
 
+          registerProduct: builder.mutation({
+            query: ({ token, productData }) => {
+              return {
+                url: "/business/register/product",
+                method: "POST",
+                headers: {
+                  'Content-Type': 'application/json',
+                  'Authorization': `Bearer ${token}`,
+                },
+                body: { productData },
+              };
+            },
+            invalidatesTags: ["product"],
+          }),
+
     }),  
   });
 
   
-  export const { useGetAllProductQuery, useGetTop4ProductQuery, useProductFromCategoryMutation, useSingleProductMutation, useProductFromKeywordMutation, useDeleteProductMutation, useGetAllDeletedProductQuery, useRecoveryProductMutation } = productSlice;
+  export const { useGetAllProductQuery, useGetTop4ProductQuery, useProductFromCategoryMutation, useSingleProductMutation, useProductFromKeywordMutation, useDeleteProductMutation, useGetAllDeletedProductQuery, useRecoveryProductMutation, useRegisterProductMutation } = productSlice;
   export default productSlice;

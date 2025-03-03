@@ -11,7 +11,6 @@ export default function ProductCategoryList({token, setToken, userRole, setUserR
     const navigate = useNavigate();
     const location = useLocation();
     const { categoryDetailId = null } = location.state || {};
-    console.log("categoryDetailId in ProductCategoryList: ", categoryDetailId);
 
     const [ addCartApi, {isLoading2, error2}] = useAddCartMutation();
     const [ products, {isLoading, error}] = useProductFromCategoryMutation();
@@ -22,13 +21,11 @@ export default function ProductCategoryList({token, setToken, userRole, setUserR
 
     useEffect(() => {
         
-        console.log("categoryDetailId", categoryDetailId);
         if(categoryDetailId){
             const fetchOrderDetails = async () => {
 
                 try {
                     const response = await products({categoryDetailId}).unwrap(); 
-                    console.log("orderDetail response: ", response);
                     setCategoryData(response);
 
                 } catch (error) {
@@ -82,7 +79,6 @@ export default function ProductCategoryList({token, setToken, userRole, setUserR
         else if(userRole === '3') return setAlert("Admin user can't order products."); 
         else{
 
-            console.log("productId category:" ,productId);
             navigate("/SingleOrder", {state: {productId:productId}});
         }
     }

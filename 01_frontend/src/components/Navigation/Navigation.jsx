@@ -2,7 +2,7 @@ import { Link } from 'react-router-dom';
 import './Navigation.css';
 import { useNavigate } from "react-router-dom";
 
-export default function Navigation({token, setToken, userRole, setUserRole}) {
+export default function Navigation({token, setToken, userRole, setUserRole, userEmail}) {
 
     const navigate = useNavigate();
 
@@ -14,7 +14,6 @@ export default function Navigation({token, setToken, userRole, setUserRole}) {
         },1000);
     }
 
-
     return(
     <>
     <div className="top">
@@ -24,6 +23,11 @@ export default function Navigation({token, setToken, userRole, setUserRole}) {
         </div>
 
         <div className="topnav">
+
+        {token && userEmail &&
+                <Link to="UserProfile">[ Email: {userEmail} ]</Link>
+        }
+
         <Link to="/">Home</Link>
         <Link to="/AboutUs">About us</Link>
 
@@ -36,7 +40,7 @@ export default function Navigation({token, setToken, userRole, setUserRole}) {
             {userRole && userRole === '1' && (
             <>
                 <Link to="/UserOrderHistory" style={{float:'right'}}>Order History</Link>
-                <Link to="/" style={{float:'right'}}>User Profile</Link>
+                <Link to="/UserProfile" style={{float:'right'}}>User Profile</Link>
                 <Link to="/UserCart" style={{float:'right'}}>Cart</Link>
                 <Link to="/" style={{float:'right'}} onClick={logOut}>Log Out</Link>
             </>
@@ -44,16 +48,16 @@ export default function Navigation({token, setToken, userRole, setUserRole}) {
             {userRole &&  userRole === '2' && (
             <>
                 <Link to="/" style={{float:'right'}} onClick={logOut}>Log Out</Link>
-                <Link to="/" style={{float:'right'}}>User Profile</Link>
-                <Link to="/ProductDetail" style={{float:'right'}}>Product Management</Link>
+                <Link to="/UserProfile" style={{float:'right'}}>User Profile</Link>
+                <Link to="/ProductManage" style={{float:'right'}}>Product Management</Link>
             </>
             )}
             {userRole &&  userRole === '3' && (
             <>
                 <Link to="/" style={{float:'right'}} onClick={logOut}>Log Out</Link>
-                <Link to="/" style={{float:'right'}}>User Profile</Link>
+                <Link to="/UserProfile" style={{float:'right'}}>User Profile</Link>
                 <Link to="/UserManage" style={{float:'right'}}>User Management</Link>
-                <Link to="/ProductDetail" style={{float:'right'}}>Product Management</Link>
+                {/* <Link to="/ProductManage" style={{float:'right'}}>Product Management</Link> */}
             </>
             )}
         </>)

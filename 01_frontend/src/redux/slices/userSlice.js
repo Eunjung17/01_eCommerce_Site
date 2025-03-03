@@ -41,6 +41,19 @@ const userSlice = api.injectEndpoints({
             }),
             providesTags:["user"],
         }),
+
+        getSingleUser: builder.query({
+            query: (token)=> ({
+                url: `/user/single/profile`,
+                method:"GET",
+                headers: {
+                'Content-Type': 'application/json',  
+                'Authorization' : `Bearer ${token}`,
+            },
+            }),
+            providesTags:["user"],
+        }),
+
         getUserInfo: builder.query({
             query: (token)=> ({
                 url: `/user/UserInfo`,
@@ -52,9 +65,9 @@ const userSlice = api.injectEndpoints({
             }),
             providesTags:["user"],
         }),
-        confirmUser: builder.mutation({
+        accessChangeUser: builder.mutation({
             query: ({token, userId }) => ({
-                url:"/admin/userConfirm",
+                url:"/admin/user/access/change",
                 method: "PUT",
                 headers: {
                     'Content-Type': 'application/json',  
@@ -66,8 +79,23 @@ const userSlice = api.injectEndpoints({
             }),
             invalidatesTags: ["user"],
           }),
+
+          updateUserProfile: builder.mutation({
+            query: ({token, profileData }) => ({
+                url:"/user/update/profile",
+                method: "PUT",
+                headers: {
+                    'Content-Type': 'application/json',  
+                    'Authorization' : `Bearer ${token}`,
+                },
+                body: {
+                    profileData,
+                },
+            }),
+            invalidatesTags: ["user"],
+          }),
     }),  
   });
   
-  export const { useRegisterUserMutation, useLoginUserMutation, useGetUserRoleQuery, useGetAllUserQuery, useConfirmUserMutation, useGetUserInfoQuery } = userSlice;
+  export const { useRegisterUserMutation, useLoginUserMutation, useGetUserRoleQuery, useGetAllUserQuery, useAccessChangeUserMutation, useGetUserInfoQuery, useGetSingleUserQuery, useUpdateUserProfileMutation } = userSlice;
   export default userSlice;

@@ -77,7 +77,6 @@ export default function Order({token, setToken, userRole, setUserRole}) {
         setAlert(null);
 
         setButtonFlag("noShow");
-console.log("token userRole 333", token, userRole);
         if(!token ||!userRole) setAlert("Login required.");
         else{
 
@@ -116,13 +115,13 @@ console.log("token userRole 333", token, userRole);
         if(orderData.orderQuantity===0) return setAlert("You must order at least 1 item.");
 
         if(!token ||!userRole) return setAlert("Login required.");
-        console.log("hook333");
+
         if(orderData.paymentMethod === "0"){
-            console.log("hook222");
+
             return setAlert("Select payment method to order.");
         }
  
-        console.log("hook");
+
         setOrderData(prevOrderData => {
             let updatedOrderData = { ...prevOrderData };
             updatedOrderData.orderQuantity = selectQuantity;
@@ -136,7 +135,7 @@ console.log("token userRole 333", token, userRole);
 
         const response = await registerSingleProduct({token, orderData}).unwrap(); 
 
-console.log("response: ", response);
+
         navigate(`/UserOrderDetail`, {
             state: { orderId: response.id }
         });
@@ -159,22 +158,13 @@ console.log("response: ", response);
     }
 
     const handleChange = (e) => {
-        console.log("orderData in handleChange 111:", orderData);
+
         setOrderData({...orderData, [e.target.name]: e.target.value});
-        console.log("orderData in handleChange:222", orderData);
 
         if (e.target.name === "orderQuantity") {
             setSelectQuantity(e.target.value);
         }
     }
-
-    // const changeQuantity = (e) => {
-    //     setSelectQuantity(e.target.value);
-    //     console.log(e.target.value);
-    //     console.log(selectQuantity);
-        
-    // }
-
 
     if (isLoading || isLoading2 || isLoading3 || isLoading4) return <div>Loading categories...</div>;
     if (error || error2 || error3 || error4) return <div>Error loading categories</div>;

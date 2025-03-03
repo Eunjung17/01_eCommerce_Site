@@ -42,7 +42,7 @@ const orderSlice = api.injectEndpoints({
 
       registerSingleOrder: builder.mutation({
         query: ({ token, orderData }) => {
-          console.log("orderSlice:", token , "::", orderData);
+
           return {
             url: "/user/register/singleOrder",
             method: "POST",
@@ -59,7 +59,7 @@ const orderSlice = api.injectEndpoints({
 
       orderDetails: builder.mutation({
             query: ({token, orderId}) => {
-              console.log("!!", token, "!!" , orderId);
+
               return {
                 url: "/user/orderDetail",
                 method: "POST",

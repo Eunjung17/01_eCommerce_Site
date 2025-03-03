@@ -15,8 +15,6 @@ export default function Navigation({token, setToken, userRole ,setUserRole}) {
 
     const [ alert, setAlert ] = useState(null);
     const [fadeOut, setFadeOut] = useState(false);
-
-    console.log(top4Products);
     
     const [activeIndex, setActiveIndex] = useState(null); 
     const [searchKeyword, setSearchKeyword] = useState(""); 
@@ -37,13 +35,10 @@ export default function Navigation({token, setToken, userRole ,setUserRole}) {
             return openModal();
         }
 
-        console.log(typeof(userRole));
-
         if(userRole === '2') setAlert("Business user can't order products."); 
         else if(userRole === '3') setAlert("Admin user can't order products."); 
         else{
 
-            console.log("again:" , token, " ",productId," ", quantity);
             const response = await addCartApi({token, productId, quantity}).unwrap(); 
 
             navigate("/UserCart");
@@ -69,8 +64,6 @@ export default function Navigation({token, setToken, userRole ,setUserRole}) {
         else if(userRole === '2') return setAlert("Business user can't order products."); 
         else if(userRole === '3') return setAlert("Admin user can't order products."); 
         else{
-
-            console.log("productId category:" ,productId);
             navigate("/SingleOrder", {state: {productId:productId}});
         }
     }
@@ -80,6 +73,15 @@ export default function Navigation({token, setToken, userRole ,setUserRole}) {
         setAlert(null);
         navigate("/ProductCategoryList", {
             state: {categoryDetailId: id}
+        });
+    }
+
+    const productDetail  = (productId, quantity) => {
+
+        setAlert(null);
+
+        navigate("/SingleProduct", {
+            state: {productId: productId}
         });
     }
 
@@ -175,7 +177,7 @@ export default function Navigation({token, setToken, userRole ,setUserRole}) {
                     <div>
                         <p>{top4Products[0].description}</p>
                         <h5>${top4Products[0].price}</h5>
-                        <button type="button" className="btn btn-secondary" style={{margin: '5px'}}>Detail</button>
+                        <button type="button" className="btn btn-secondary" style={{margin: '5px'}} onClick={()=>productDetail(top4Products[0].id, 1)}>Detail</button>
                         <button className="btn btn-success" type="submit" style={{margin: '5px'}} onClick={()=>cart(top4Products[0].id, 1)}>Cart</button>
                         <button className="btn btn-primary" type="submit" style={{margin: '5px'}} onClick={()=>order(top4Products[0].id, 1)}>Order</button>
                     </div>
@@ -193,7 +195,7 @@ export default function Navigation({token, setToken, userRole ,setUserRole}) {
                     <div>
                         <p>{top4Products[1].description}</p>
                         <h5>${top4Products[1].price}</h5>
-                        <button type="button" className="btn btn-secondary" style={{margin: '5px'}}>Detail</button>
+                        <button type="button" className="btn btn-secondary" style={{margin: '5px'}} onClick={()=>productDetail(top4Products[1].id, 1)}>Detail</button>
                         <button className="btn btn-success" type="submit" style={{margin: '5px'}} onClick={()=>cart(top4Products[1].id, 1)}>Cart</button>
                         <button className="btn btn-primary" type="submit" style={{margin: '5px'}} onClick={()=>order(top4Products[1].id, 1)}>Order</button>
                     </div>
@@ -218,7 +220,7 @@ export default function Navigation({token, setToken, userRole ,setUserRole}) {
                     <div>
                         <p>{top4Products[2].description}</p>
                         <h5>${top4Products[2].price}</h5>
-                        <button type="button" className="btn btn-secondary" style={{margin: '5px'}}>Detail</button>
+                        <button type="button" className="btn btn-secondary" style={{margin: '5px'}} onClick={()=>productDetail(top4Products[2].id, 1)}>Detail</button>
                         <button className="btn btn-success" type="submit" style={{margin: '5px'}} onClick={()=>cart(top4Products[2].id, 1)}>Cart</button>
                         <button className="btn btn-primary" type="submit" style={{margin: '5px'}} onClick={()=>order(top4Products[2].id, 1)}>Order</button>
                     </div>
@@ -236,7 +238,7 @@ export default function Navigation({token, setToken, userRole ,setUserRole}) {
                     <div>
                         <p>{top4Products[3].description}</p>
                         <h5>${top4Products[3].price}</h5>
-                        <button type="button" className="btn btn-secondary" style={{margin: '5px'}}>Detail</button>
+                        <button type="button" className="btn btn-secondary" style={{margin: '5px'}} onClick={()=>productDetail(top4Products[3].id, 1)}>Detail</button>
                         <button className="btn btn-success" type="submit" style={{margin: '5px'}} onClick={()=>cart(top4Products[3].id, 1)}>Cart</button>
                         <button className="btn btn-primary" type="submit" style={{margin: '5px'}} onClick={()=>order(top4Products[3].id, 1)}>Order</button>
                     </div>

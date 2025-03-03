@@ -3,8 +3,8 @@ import React, { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 // import { useGetUserRoleQuery, useGetAllUserQuery, useConfirmUserMutation } from '../../redux/slices/userSlice'
 import { useGetCategoryAllQuery } from '../../redux/slices/categorySlice'
-import { useGetAllProductQuery, useDeleteProductMutation, useGetAllDeletedProductQuery, useRecoveryProductMutation } from '../../redux/slices/productSlice'
-import './ProductDetail.css';
+import { useGetAllProductQuery, useDeleteProductMutation, useGetAllDeletedProductQuery, useRecoveryProductMutation, useRegisterProductMutation } from '../../redux/slices/productSlice'
+import './ProductManage.css';
 
 export default function ProductDetail({token, setToken, userRole, setUserRole}) {
 
@@ -12,19 +12,19 @@ export default function ProductDetail({token, setToken, userRole, setUserRole}) 
     const { data: categories, isLoading1, error1 } = useGetCategoryAllQuery(token);
     const { data: allProduct, isLoading2, error2 } = useGetAllProductQuery(token);
     const { data: allDeletedProduct, isLoading4, error4 } = useGetAllDeletedProductQuery(token);
-    console.log("categories: " , categories);
+    const [ registerProductAPI, {isLoading6, error6}] = useRegisterProductMutation();
     
     const [ deleteProductAPI, {isLoading3, error3}] = useDeleteProductMutation();
     const [ recoveryProductAPI, {isLoading5, error5}] = useRecoveryProductMutation();
-    
-
-    console.log(allProduct);
 
     const [activeTab, setActiveTab] = useState("nav-home");
 
     const [activeIndex, setActiveIndex] = useState(null); 
     const [showModal, setShowModal] = useState(false);
+    // const [showModal2, setShowModal2] = useState(false);
     const [productId, setProductId] = useState(false);
+    const [ alert, setAlert ] = useState(null);
+    const [fadeOut, setFadeOut] = useState(false);
 
     const [ productData, setProductData] = useState({
         mainCategory: '',
@@ -33,12 +33,25 @@ export default function ProductDetail({token, setToken, userRole, setUserRole}) 
         description: '',
         images: '',
         quantity:0,
+        price:0,
     });
 
-    const placeOrder  = async () => { 
-      console.log(productData);
+    const saveProduct  = async () => { 
 
+      if(!productData.mainCategory || !productData.subCategory || !productData.name || !productData.description || productData.quantity === 0 || productData.price === 0){
+        setAlert('Please fill in all fields.');
+        return;
+      }
+
+      if(productData.quantity <= 0 || productData.price <= 0){
+        setAlert('You must input number greater than 0.');
+        return;
+      }
+      const response = await registerProductAPI({token, productData}).unwrap(); 
       
+      // setShowModal2(true);
+      handleTabClick("nav-home")
+
   }
 
   const cancel  = () => {
@@ -46,26 +59,22 @@ export default function ProductDetail({token, setToken, userRole, setUserRole}) 
   }
 
   const deleteConfirm  = async (id) => {
-console.log("id:" , id);
+
       setProductId(id);
       return setShowModal(true);
 }
 
   const deleteProduct  = async () => {
-console.log("token productId",token, ": ", productId);
 
     const response = await deleteProductAPI({token, productId}).unwrap(); 
-    console.log(response);
     setShowModal(false);
     return setActiveTab("nav-contact");
   }
 
 
   const dataRecovery  = async (id) => {
-    console.log("token productId",token, ": ", id);
     
         const response = await recoveryProductAPI({token, id}).unwrap(); 
-        console.log(response);
         setShowModal(false);
         return setActiveTab("nav-home");
     }
@@ -75,28 +84,45 @@ console.log("token productId",token, ": ", productId);
         setActiveIndex(activeIndex === index ? null : index);
     };
 
-    if (isLoading1 || isLoading2 || isLoading3 || isLoading4 || isLoading5) return <div>Loading categories...</div>;
-    if (error1 || error2 || error3 || error4 || error5) return <div>Error loading categories</div>;
+    if (isLoading1 || isLoading2 || isLoading3 || isLoading4 || isLoading5 || isLoading6) return <div>Loading categories...</div>;
+    if (error1 || error2 || error3 || error4 || error5 || error6) return <div>Error loading categories</div>;
 
 
     const handleTabClick = (tabId) => {
         setActiveTab(tabId); 
     };
+    
+    const handleClose = () => {
 
-    const openModal = () => setShowModal(true);
+      if(alert){
+        setFadeOut(true);
+        setTimeout(() => {
+            setAlert("");
+            setFadeOut(false);
+        }, 600);
+      }
 
-    const closeModal = () => setShowModal(false);
-
-    const handleChange = (e) => {
-
-      setProductData({...productData, [e.target.name]: e.target.value});
-      console.log("productData:", productData);
   }
 
+    const openModal = () => {
+      if(!showModal){
+        setShowModal(true);
+      }
+    }
 
+    const closeModal = () => {
+      if(!showModal){
+        setShowModal(true);
+      }
+    }
 
+    const handleChange = (e) => {
+      setAlert("");
 
-    return(
+      setProductData((prevState) => ({ ...prevState, [e.target.name]: e.target.value }));
+  }
+
+  return(
         <>
 
             <div>
@@ -126,7 +152,16 @@ console.log("token productId",token, ": ", productId);
             <div className="row">
                 <div className="middle2column">
                     <div className="card">
-                    <h5 className="card-title"><i>Product Management</i></h5>&nbsp;
+                      
+
+                    {alert &&
+                    <div id="notification" className={`alert warning ${fadeOut ? 'fade-out' : ''}`} onClick={handleClose}>
+                        <span className="closebtn">&times;</span>  
+                        <strong>Warning!</strong> {alert}
+                    </div>
+                }
+
+                    <h5 className="card-title"><i><u>Product Management</u></i></h5>&nbsp;
                     <nav>
                         <div className="nav nav-tabs" id="nav-tab" role="tablist">
                             <button 
@@ -227,7 +262,7 @@ console.log("token productId",token, ": ", productId);
                                       <tr>
                                         <th scope="row">Main Category</th>
                                         <th scope="row">
-                                          <select className="form-select" name="mainCategory" value={productData?.mainCategory} onChange={handleChange} aria-label="Default select example" style={{width: '250px'}}>
+                                          <select className="form-select" name="mainCategory" value={productData.mainCategory || ''} onChange={handleChange} aria-label="Default select example" style={{width: '250px'}}>
                                               <option value="0">Choose main category</option>
                                           {categories && categories?.map(p=>(
                                               <option key={p.id} value={p.id}>{p.name}</option>
@@ -238,7 +273,7 @@ console.log("token productId",token, ": ", productId);
                                       <tr>
                                         <th scope="row">Sub Category</th>
                                         <th scope="row">
-                                          <select className="form-select" name="subCategory" value={productData?.subCategory} onChange={handleChange} aria-label="Default select example" style={{width: '250px'}}>
+                                          <select className="form-select" name="subCategory" value={productData.subCategory || ''} onChange={handleChange} aria-label="Default select example" style={{width: '250px'}}>
                                                 <option value="0">Choose sub category</option>
                                             {categories && categories
                                               .filter(category=>category.id === productData.mainCategory)
@@ -280,7 +315,7 @@ console.log("token productId",token, ": ", productId);
                                       </tr>
                                       <tr>
                                         <td colSpan="2">
-                                          <button type="button" className="btn btn-primary btn-lg" style={{width:'200px', margin:'20px'}} onClick={placeOrder}>Save</button>
+                                          <button type="button" className="btn btn-primary btn-lg" style={{width:'200px', margin:'20px'}} onClick={saveProduct}>Save</button>
                                           <button type="button" className="btn btn-primary btn-lg" style={{width:'200px', margin:'20px'}} onClick={cancel}>Cancel</button>
                                         </td>
                                       </tr>
@@ -330,11 +365,6 @@ console.log("token productId",token, ": ", productId);
                             </table>
                         </div>
                     </div>
-
-                    {/* <div style={{display:'flex',float:'right',margin:'20px'}}>
-                        <input className="form-control mr-sm-2" type="search" placeholder="Search" aria-label="Search" style={{ marginRight: '10px' }} />
-                        <button className="btn btn-outline-success my-2 my-sm-0" type="submit">Search</button>
-                    </div> */}
 
                     </div>
                 </div>

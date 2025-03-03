@@ -3,7 +3,7 @@
     import './Registration.css';
     import { useRegisterUserMutation } from '../../redux/slices/userSlice'
 
-    export default function Registration({token, setToken, userRole, setUserRole}) {
+    export default function Registration({token, setToken, userRole, setUserRole, setUserEmail}) {
 
         const navigate = useNavigate();
         const [alert, setAlert] = useState("");
@@ -40,7 +40,6 @@
 
         const userRegistration = async(e) => {
             e.preventDefault();
-           // setAlert("");
 
             try {
                 if(formData.email && formData.firstName && formData.lastName && formData.password && formData.confirmPassword && formData.address && formData.phone && formData.userRoleId){
@@ -52,8 +51,6 @@
                         return;
                     }else{  //possible condition to register                         
                         const response = await registerUserApi(formData).unwrap(); 
-                        console.log("response:" ,response)   
-                        console.log("response?.response.userRoleId.toString(): ", response?.userInformation?.userRoleId.toString());
 
                         if(response.message){ //if same id exists,  message: "Please try again later." from backend
                             setAlert(response.message);
@@ -61,6 +58,7 @@
                         }else if(response.token){ //if user gets token after successful registration.
                             setToken(response.token);
                             setUserRole(response?.response.userRoleId.toString());
+                            setUserEmail(response?.userInformation?.email?.toString());
                             navigate("/");
                         }
                     }

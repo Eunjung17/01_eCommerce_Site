@@ -196,7 +196,7 @@ router.post("/user/register", async(req, res, next) => {
               address,
               phone,
               userRoleId: +userRoleId,
-              confirmAdmin: false,
+              confirmAdmin: true,
               taxId,
               isDeleted: false,
               createdAt: new Date()
@@ -231,8 +231,11 @@ router.post('/user/login', async (req, res, next) => {
         isDeleted: false,
       },
     });
+    if (userInformation && !userInformation.confirmAdmin) {
+      return res.status(401).json({ message: 'Access is restricted. Please contact the administrator for any inquiries. contact: admin@admin.com' });
+    }
     if (!userInformation) {
-      return res.status(401).json({ message: 'Unauthorized' });
+      return res.status(401).json({ message: 'Unauthorized - Check your email address and password again.' });
     }
     const match = bcrypt.compare(password, userInformation.password);
     if (match) {
@@ -356,6 +359,9 @@ router.get("/user/getCart", isLoggedIn, async (req, res, next) => {
             }
           },
         },
+        orderBy: {
+          id: 'asc', 
+        },
       });
 
       res.status(200).json(response);
@@ -366,42 +372,46 @@ router.get("/user/getCart", isLoggedIn, async (req, res, next) => {
   }
 });
 
-// router.get("/user/orderHistory", isLoggedIn, async (req, res, next) => {
-// console.log("history!");
-//   try {
+router.put("/user/cart/quantity", isLoggedIn, async (req, res, next) => {
 
-//     if(!req.user){
-//       return res.status(401).json({ message: "Not Authorized" });
+  try {
 
-//     }else{
+    if(!req.user){
+      return res.status(401).json({ message: "Not Authorized" });
+
+    }else{
+
+
+      const {cartDetailId, quantity} = req.body;
     
+      const cart = await prisma.cart.findUnique({
+        where: { 
+          userId: req.user.id, 
+          isDeleted: false, 
+        },
+      });
 
-//       const response = await prisma.orderDetail.findMany({
-//         where: {
-//           order: {
-//             userId: req.user.id, 
-//             isDeleted: false,
-//           },
-//           isDeleted: false,
-//         },
-//         include: {
-//           order: {
-//             include: {
-//               paymentMethod: true,
-//             },
+      const response = await prisma.cartDetail.update({
+        where: {
+          isDeleted: false,
+          cartId: cart.id,
+          id: cartDetailId,
+        },
+        data: {
+          quantity: +quantity, 
+        },
 
-//           }, 
-//           product: true,
-//         },
-//       });
-// console.log("orderHistory response:", response);
-//       res.status(200).json(response);
+      });
 
-//     }
-//   } catch (error) {
-//       next(error);
-//   }
-// });
+
+      res.status(200).json(response);
+
+    }
+  } catch (error) {
+      next(error);
+  }
+});
+
 
 router.get("/user/orderHistory", isLoggedIn, async (req, res, next) => {
 
@@ -434,7 +444,7 @@ router.get("/user/orderHistory", isLoggedIn, async (req, res, next) => {
           paymentMethod: true,
         },
       });
-      console.log("response: history:", response);
+
       res.status(200).json(response);
 
     }
@@ -478,6 +488,43 @@ router.delete('/user/delete/Cart', isLoggedIn, async (req, res, next) => {
           productId: {
             in: cartDetails.map(detail => detail.productId),
           },
+        },
+      });
+
+    res.status(200).json({message: "delete successful"}); 
+    }
+
+  } catch (error) {
+    next(error);
+  }
+});
+
+router.delete('/user/delete/each/CartDetail', isLoggedIn, async (req, res, next) => {
+  try {
+
+    if(!req.user){
+      return res.status(401).json({ message: "Not Authorized" });
+
+    }else{
+
+      const { cartDetailId } = req.body;
+
+      const cart = await prisma.cart.findUnique({
+        where: {
+          userId: req.user.id,
+        },
+        include: {
+          cartDetails: true,
+        },
+      });
+
+      if(!cart) return res.status(401).json({ message: "Not Authorized" });
+
+      await prisma.cartDetail.delete({
+        where: {
+          id: cartDetailId,
+          cartId: cart.id,
+          isDeleted: false,
         },
       });
 
@@ -694,9 +741,9 @@ router.post('/user/registerOrderFromCart', isLoggedIn, async (req, res, next) =>
 
 router.post('/user/register/singleOrder', isLoggedIn, async (req, res, next) => {
   try {
-    console.log("startd");
+
     const { orderData } = req.body;
-console.log(orderData);
+
     if(!req.user){
       return res.status(401).json({ message: "Not Authorized" });
 
@@ -710,8 +757,7 @@ console.log(orderData);
           quantity: true,
         },
       });
-console.log("product:" , product.quantity);
-console.log(" orderData.orderQuantity:" ,  orderData.orderQuantity);
+
       if(parseInt(product.quantity) < parseInt(orderData.orderQuantity)) return res.status(401).json({ message: "product is not enougth." });
 
       const orderResponse = await prisma.order.create({
@@ -733,7 +779,7 @@ console.log(" orderData.orderQuantity:" ,  orderData.orderQuantity);
             },
           },
       });
-  console.log("orderResponse:" , orderResponse);
+ 
       if(!orderResponse.id) return res.status(401).json({ message: "Not Authorized" }); 
 
       const responseUpdate = await prisma.product.update({
@@ -746,7 +792,6 @@ console.log(" orderData.orderQuantity:" ,  orderData.orderQuantity);
           },
         },
       });
-      console.log("responseUpdate:" , responseUpdate);
 
       const responseCreate = await prisma.orderDetail.create({
           data: {
@@ -765,10 +810,7 @@ console.log(" orderData.orderQuantity:" ,  orderData.orderQuantity);
             },
           },
       });
-
-      console.log("responseCreate:" , responseCreate);
       
-
       res.status(200).json(responseCreate);
 
     }
@@ -780,11 +822,10 @@ console.log(" orderData.orderQuantity:" ,  orderData.orderQuantity);
 
 
 router.post("/user/orderDetail", isLoggedIn, async (req, res, next) => {
-  console.log(req.body);
+
   try {
-    console.log(req.body);
+
     const { orderId } = req.body;
-    console.log(orderId);
 
     if(!req.user){
       return res.status(401).json({ message: "Not Authorized" });
@@ -865,7 +906,7 @@ router.post("/category/product", async(req, res, next) => {
   try {
 
       const { categoryDetailId } = req.body;
-      console.log("start categoryDetailId", categoryDetailId);     
+
       const response = await prisma.categoryDetail.findMany({
           where: {
             id: categoryDetailId,
@@ -875,7 +916,7 @@ router.post("/category/product", async(req, res, next) => {
             category: true,
           },
       });
-      console.log("start response", response); 
+
       if (response && response.length > 0) {
           res.status(201).json(response);
       }else{
@@ -913,7 +954,7 @@ router.post("/keyword/product", async(req, res, next) => {
       });
     
       if (response && response.length > 0) {
-        console.log("2:", response);
+
           res.status(201).json(response);
       }else{
           res.status(400).json({  message: "There is no matching product." });
@@ -941,13 +982,8 @@ router.get("/product/selectItems", isLoggedIn, async(req, res, next) => {
   }
 });
 
-router.post("/user/singleProduct", isLoggedIn, async(req, res, next) => {
+router.post("/user/singleProduct", async(req, res, next) => {
   try {
-    console.log("req.body:" , req.body);
-    if(!req.user){
-      return res.status(401).json({ message: "Not Authorized" });
-
-    }else{
 
       const { productId } = req.body;
       
@@ -966,8 +1002,8 @@ router.post("/user/singleProduct", isLoggedIn, async(req, res, next) => {
           },
         },
       );
+
       res.status(200).json(response);
-    }
   } catch (error) {
       next(error);
   }
@@ -1015,7 +1051,30 @@ router.get("/admin/allUsers", isLoggedIn, async (req, res, next) => {
   }
 });
 
-router.put('/admin/userConfirm', isLoggedIn, async (req, res, next) => {
+
+router.get("/user/single/profile", isLoggedIn, async (req, res, next) => {
+
+  try {
+
+    if(!req.user){
+      return res.status(401).json({ message: "Not Authorized" });
+
+    }else{
+      
+      const response = await prisma.user.findUnique({
+          where: {
+              id: req.user.id,
+          },
+      });
+      res.status(200).json(response);
+
+    }
+  } catch (error) {
+      next(error);
+  }
+});
+
+router.put('/admin/user/access/change', isLoggedIn, async (req, res, next) => {
   try {
 
     if(!req.user){
@@ -1025,12 +1084,63 @@ router.put('/admin/userConfirm', isLoggedIn, async (req, res, next) => {
     
       const { userId } = req.body;
 
-      const response = await prisma.user.update({
+      const status = await prisma.user.findUnique({
+        where: {
+          id: userId,
+        },
+      });
+
+      if(status.confirmAdmin === true){
+        const response = await prisma.user.update({
+          where: {
+              id: userId,
+          },
+          data: {
+              confirmAdmin: false,
+          },
+        });
+
+        res.status(200).json(response);
+
+      }else{
+        const response = await prisma.user.update({
           where: {
               id: userId,
           },
           data: {
               confirmAdmin: true,
+          },
+       });
+
+        res.status(200).json(response);
+      }
+
+    }
+
+  } catch (error) {
+    next(error);
+  }
+});
+
+
+router.put('/user/update/profile', isLoggedIn, async (req, res, next) => {
+  try {
+
+    if(!req.user){
+      return res.status(401).json({ message: "Not Authorized" });
+
+    }else{
+    
+      const { profileData } = req.body;
+
+      const response = await prisma.user.update({
+          where: {
+              id: req.user.id,
+              isDeleted: false,
+          },
+          data: {
+              address: profileData.address,
+              phone: profileData.phone,
           }
       });
       res.status(200).json(response);
@@ -1109,9 +1219,7 @@ router.get("/top4Products", async (req, res, next) => {
   try {
 
       const response = await prisma.product.findMany({
-          // where: {
-          //     userId : req.user.id,
-          // },
+
           orderBy: {id: 'asc'},
           take: 4, // Limit the result to 4 products
       });
@@ -1122,7 +1230,9 @@ router.get("/top4Products", async (req, res, next) => {
   }
 });
 
-router.post("/business/createProduct", isLoggedIn, async(req, res, next) => {
+
+
+router.post("/business/register/product", isLoggedIn, async(req, res, next) => {
   try {
 
     if(!req.user){
@@ -1130,26 +1240,21 @@ router.post("/business/createProduct", isLoggedIn, async(req, res, next) => {
 
     }else{
       
-      const { userId, name, categoryDetailId, description, price, images, quantity } = req.body;
+      const {productData} = req.body;
 
-      const existingUserRole = await prisma.product.findMany({
-          where: { name },
-      });
-
-      if(existingUserRole.length > 0) return res.status(400).json({ message: "name already taken" });
-      
       const response = await prisma.product.create({
           data: {
-            userId,
-            name,
-            categoryDetailId,
-            description,
-            price: +price,
-            images,
-            quantity: +quantity,
+            userId: req.user.id,
+            name: productData.name,
+            categoryDetailId: productData.subCategory,
+            description: productData.description,
+            price: +productData.price,
+            images: productData.images,
+            quantity: +productData.quantity,
             isDeleted : false,
           },
       });
+
 
       if(response.id) res.status(201).json(response); 
       else res.status(400).json({  message: "Please try again later." });
@@ -1160,24 +1265,4 @@ router.post("/business/createProduct", isLoggedIn, async(req, res, next) => {
       next(error);
   }
 });
-
-// router.get("/business/allProducts", isLoggedIn, async (req, res, next) => {
-
-//   try {
-
-//     if(!req.user){
-//       return res.status(401).json({ message: "Not Authorized" });
-
-//     }else{
-      
-//       const response = await prisma.product.findMany({
-//         where: { id: req.user.id },
-//       });
-//       res.status(200).json(response);
-
-//     }
-//   } catch (error) {
-//       next(error);
-//   }
-// });
 

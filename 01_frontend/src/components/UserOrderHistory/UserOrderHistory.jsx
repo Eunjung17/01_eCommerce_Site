@@ -12,7 +12,7 @@ export default function UserOrderHistory({
   userRole,
   setUserRole,
 }) {
-  console.log("orderHistory aaa");
+
   const navigate = useNavigate();
 
   const {
@@ -25,14 +25,14 @@ export default function UserOrderHistory({
 
   const handleClick = (e, id) => {
     e.preventDefault();
-    console.log(id);
+
     setOrderIdChoose(id);
   };
 
   const moveToHome = () => {
     navigate("/");
   };
-  console.log("orderHistory: ", orderHistory);
+
 
   if (isLoading) return <div>Loading categories...</div>;
   if (error) return <div>Error loading categories</div>;
@@ -45,7 +45,7 @@ export default function UserOrderHistory({
 
         <div className="left">
             <h5 className="card-title">
-              <i>Order History</i>
+              <i><u>Order History</u></i>
             </h5>
             <table className="table table-hover">
               <thead></thead>
@@ -100,8 +100,8 @@ export default function UserOrderHistory({
               <thead></thead>
               <tbody className="table-group-divider">
                 <tr>
-                  <td scope="col">Image</td>
                   <td scope="col">Name</td>
+                  <td scope="col"></td>
                   <td scope="col">Quantity</td>
                   <td scope="col">Total Price</td>
                 </tr>
