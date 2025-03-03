@@ -9,7 +9,7 @@
 # Business User
 - Product Manage 
 - UserProfile
-- sample account: b1@b1 / 1 , b2@b2 / 2 , b3@/b3 / 3
+- sample account: b1@b1 / 1 , b2@b2 / 2 , b3@b3 / 3
 
 # Administrator User 
 - User Profile
