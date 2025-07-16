@@ -1,4 +1,6 @@
-# 01_eCommerce_Site
+# 01_eCommerce_Site 
+
+[presentation](https://docs.google.com/presentation/d/1_E2D-_uqx2CB90uy9fI5C6HRkStrObzerSMai5cN6Po/edit?slide=id.g33c7d60c239_0_388#slide=id.g33c7d60c239_0_388)
 
 # Individual User
  - Cart
@@ -15,3 +17,4 @@
 - User Profile
 - User Manage
 - sample account: admin@admin / 1
+
