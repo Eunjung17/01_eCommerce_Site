@@ -215,13 +215,15 @@ const seed = async () => {
     };
 
     for (const categoryName of categories) {
-      const category = await prisma.category.create({
-        data: {
+      const category = await prisma.category.upsert({
+        where: { name: categoryName },
+        update: {}, 
+        create: {
           name: categoryName,
           description: faker.commerce.productDescription(),
           isDeleted: false,
         },
-      });
+    });
 
       for (const categoryDetailName of categoryDetails[categoryName]) {
         const categoryDetail = await prisma.categoryDetail.create({
