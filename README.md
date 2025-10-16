@@ -3,6 +3,7 @@
 **Period:** 2025.02.10 – 2025.03.05  
 📽️ [View Presentation](https://docs.google.com/presentation/d/1_E2D-_uqx2CB90uy9fI5C6HRkStrObzerSMai5cN6Po/edit?slide=id.g33c7d60c239_0_388#slide=id.g33c7d60c239_0_388)
 📽️ [Table Architecture](https://github.com/Eunjung17/01_eCommerce_Site/blob/main/table_architecture/ERD.pdf)
+📽️ [Site Link](https://01ecommercefrontend.netlify.app/)
 
 
 ---
